@@ -1,4 +1,4 @@
-using AppCore;
+﻿using AppCore;
 using AppCore.Extensions;
 using Repositories;
 using Repositories.Extensions;
@@ -14,6 +14,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddRepositories(builder.Configuration.GetConnectionString("DefaultConnection"));
 builder.Services.AddTransient<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IUniversityService, UniversityService>();
 // Add services
 builder.Services.AddMemoryCache();
 builder.Services.Configure<FingerprintOptions>(builder.Configuration.GetSection("Fingerprint"));
