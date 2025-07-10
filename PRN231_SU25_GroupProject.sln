@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AppCore", "AppCore\AppCore.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Repositories", "Repositories\Repositories.csproj", "{001B6498-FF6A-4473-904E-47680AA809BA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RazorFrontend", "RazorFrontend\RazorFrontend.csproj", "{C5136C46-BCD1-441A-9358-94EEC19F9065}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{001B6498-FF6A-4473-904E-47680AA809BA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{001B6498-FF6A-4473-904E-47680AA809BA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{001B6498-FF6A-4473-904E-47680AA809BA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C5136C46-BCD1-441A-9358-94EEC19F9065}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C5136C46-BCD1-441A-9358-94EEC19F9065}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C5136C46-BCD1-441A-9358-94EEC19F9065}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C5136C46-BCD1-441A-9358-94EEC19F9065}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

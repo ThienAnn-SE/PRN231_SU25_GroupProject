@@ -1,0 +1,37 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Home";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-10 text-center">
+            <h1 class="display-4 mb-3">Discover Your Personality</h1>
+            <p class="lead text-muted mb-4">
+                Take our free MBTI-based personality test and get insights into your strengths, preferences, and potential career paths.
+            </p>
+
+            @if (User.Identity?.IsAuthenticated ?? false)
+            {
+                <h5 class="mb-4">Welcome, @User.Identity.Name 👋</h5>
+                <a class="btn btn-primary btn-lg px-4 py-2" asp-page="/Test/Take">Start the Test</a>
+                <a class="btn btn-outline-secondary btn-lg ms-3 px-4 py-2" asp-page="/Account/Logout">Logout</a>
+            }
+            else
+            {
+                <a class="btn btn-primary btn-lg px-4 py-2" asp-page="/Account/Login">Log In</a>
+                <a class="btn btn-outline-secondary btn-lg ms-3 px-4 py-2" asp-page="/Account/Register">Register</a>
+            }
+
+            <div class="mt-5">
+                <h4 class="mb-3">Why take this test?</h4>
+                <ul class="list-unstyled">
+                    <li class="mb-2">🔍 Understand your behavior and decision-making style</li>
+                    <li class="mb-2">💼 Get career recommendations that fit your personality</li>
+                    <li class="mb-2">🤝 Improve communication and relationships</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
