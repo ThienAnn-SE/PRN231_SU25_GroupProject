@@ -1,0 +1,62 @@
+﻿/* 🌐 Global Style Enhancements */
+body {
+    font-family: 'Segoe UI', sans-serif;
+    background-color: #f8f9fa;
+    color: #333;
+}
+
+/* 🌟 Buttons */
+.btn-primary {
+    background-color: #4e73df;
+    border-color: #4e73df;
+}
+
+    .btn-primary:hover {
+        background-color: #2e59d9;
+        border-color: #2653d4;
+    }
+
+.btn-outline-secondary:hover {
+    background-color: #f0f0f0;
+    color: #333;
+}
+
+/* 🎴 Cards */
+.card {
+    border-radius: 0.75rem;
+    border: none;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.05);
+}
+
+.card-body h3 {
+    font-weight: 700;
+}
+
+/* 🔠 Inputs */
+input.form-control {
+    border-radius: 0.5rem;
+    border: 1px solid #ced4da;
+    padding: 0.75rem;
+}
+
+/* 🚨 Validation */
+.text-danger {
+    font-size: 0.875rem;
+}
+
+/* 💡 Section: Benefits List */
+ul.benefits {
+    font-size: 1.05rem;
+    line-height: 1.7;
+}
+
+    ul.benefits li::before {
+        content: "✔️ ";
+    }
+
+/* 👞 Footer */
+footer.footer {
+    background-color: #f1f1f1;
+    padding: 1rem 0;
+    font-size: 0.9rem;
+}

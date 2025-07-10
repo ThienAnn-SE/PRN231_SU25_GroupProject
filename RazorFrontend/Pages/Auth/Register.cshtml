@@ -4,42 +4,42 @@
     ViewData["Title"] = "Register";
 }
 
-<div class="container mt-5">
+<div class="container py-5">
     <div class="row justify-content-center">
         <div class="col-md-6 col-lg-5">
-            <div class="card shadow-lg">
-                <div class="card-body">
-                    <h3 class="text-center mb-4">Create Account 🚀</h3>
-                    <p class="text-center text-muted mb-4">Join and discover your personality today!</p>
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-4">
+                    <h3 class="text-center fw-bold text-success mb-3">📝 Create Account</h3>
+                    <p class="text-center text-muted mb-4">Join the community and find your MBTI type.</p>
 
-                    <form method="post">
+                    <form method="post" novalidate>
                         <div class="mb-3">
                             <label asp-for="Input.UserName" class="form-label">Username</label>
                             <input asp-for="Input.UserName" class="form-control" />
-                            <span asp-validation-for="Input.UserName" class="text-danger"></span>
+                            <span asp-validation-for="Input.UserName" class="text-danger small"></span>
                         </div>
                         <div class="mb-3">
                             <label asp-for="Input.Email" class="form-label">Email</label>
                             <input asp-for="Input.Email" class="form-control" />
-                            <span asp-validation-for="Input.Email" class="text-danger"></span>
+                            <span asp-validation-for="Input.Email" class="text-danger small"></span>
                         </div>
                         <div class="mb-3">
                             <label asp-for="Input.Password" class="form-label">Password</label>
                             <input asp-for="Input.Password" type="password" class="form-control" />
-                            <span asp-validation-for="Input.Password" class="text-danger"></span>
+                            <span asp-validation-for="Input.Password" class="text-danger small"></span>
                         </div>
 
                         @if (!string.IsNullOrEmpty(Model.ErrorMessage))
                         {
-                            <div class="alert alert-danger">@Model.ErrorMessage</div>
+                            <div class="alert alert-danger mt-2">@Model.ErrorMessage</div>
                         }
 
-                        <button type="submit" class="btn btn-primary w-100">Register</button>
+                        <button type="submit" class="btn btn-success w-100 mt-3">Create Account</button>
                     </form>
 
-                    <div class="mt-3 text-center">
+                    <div class="mt-4 text-center">
                         <span>Already have an account?</span>
-                        <a asp-page="/Login">Log in</a>
+                        <a asp-page="/Auth/Login">Log in here</a>
                     </div>
                 </div>
             </div>
