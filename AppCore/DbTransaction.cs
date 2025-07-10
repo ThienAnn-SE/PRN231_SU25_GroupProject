@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using AppCore.Data;
 
 namespace AppCore
 {
@@ -26,9 +26,9 @@ namespace AppCore
 
     public class DbTransaction : IDbTransaction
     {
-        private readonly DbContext _context;
+        private readonly ApplicationDbContext _context;
 
-        public DbTransaction(DbContext context)
+        public DbTransaction(ApplicationDbContext context)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
         }

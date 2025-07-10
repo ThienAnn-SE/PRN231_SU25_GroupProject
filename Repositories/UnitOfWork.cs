@@ -1,4 +1,5 @@
 using AppCore;
+using AppCore.Data;
 using Microsoft.EntityFrameworkCore;
 
 namespace Repositories
@@ -32,7 +33,7 @@ namespace Repositories
     /// </summary>
     public class UnitOfWork : IUnitOfWork
     {
-        private readonly DbContext _dbContext;
+        private readonly ApplicationDbContext _dbContext;
         private readonly IDbTransaction _transaction;
         private bool _disposed;
 
@@ -49,7 +50,7 @@ namespace Repositories
         /// Initializes a new instance of the Unit of Work
         /// </summary>
         public UnitOfWork(
-            DbContext dbContext, 
+            ApplicationDbContext dbContext, 
             IDbTransaction transaction)
         {
             _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
