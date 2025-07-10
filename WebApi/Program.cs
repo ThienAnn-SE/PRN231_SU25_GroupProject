@@ -1,9 +1,7 @@
-using AppCore;
 using AppCore.Extensions;
-using Repositories;
 using Repositories.Extensions;
+using WebApi.Extension;
 using WebApi.Middlewares;
-using WebApi.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -12,8 +10,8 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 // Register repositories and unit of work
 builder.Services.AddRepositories(builder.Configuration.GetConnectionString("DefaultConnection"));
-builder.Services.AddTransient<IUnitOfWork, UnitOfWork>();
-builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddServices();
+
 // Add services
 builder.Services.AddMemoryCache();
 builder.Services.Configure<FingerprintOptions>(builder.Configuration.GetSection("Fingerprint"));

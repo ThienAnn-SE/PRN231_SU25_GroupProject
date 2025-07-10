@@ -55,7 +55,7 @@ namespace Repositories
             return _testRepository.SaveAsync(newTest, creatorId, cancellationToken);
         }
 
-        public Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken = default)
+        public async Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken = default)
         {
             var filter = new Expression<Func<Test, bool>>[]
             {
@@ -64,10 +64,10 @@ namespace Repositories
             var existingTest = _testRepository.FindOneAsync(filter, cancellationToken: cancellationToken);
             if (existingTest == null)
             {
-                return Task.FromResult(false);
+                return false;
             }
 
-            return _testRepository.HardDeleteAsync(id, cancellationToken);
+            return await _testRepository.HardDeleteAsync(id, cancellationToken);
         }
 
         public Task<List<TestDto>> GetAll(CancellationToken cancellationToken = default)
@@ -91,16 +91,16 @@ namespace Repositories
             var existingTest = await _testRepository.FindOneAsync(filter, cancellationToken: cancellationToken);
             if (existingTest == null)
             {
-                return await Task.FromResult<TestDto?>(null);
+                return null;
             }
-
-            return await Task.FromResult(new TestDto
+            
+            return new TestDto
             {
                 Id = existingTest.Id,
                 Title = existingTest.Title,
                 Description = existingTest.Description,
                 CreatedAt = existingTest.CreatedAt
-            });
+            };
         }
 
         public async Task<bool> UpdateAsync(TestDto testDto, Guid? updaterId = null, CancellationToken cancellationToken = default)
@@ -112,7 +112,7 @@ namespace Repositories
             var existingTest = await _testRepository.FindOneAsync(filter, cancellationToken: cancellationToken);
             if (existingTest == null)
             {
-                return await Task.FromResult(false);
+                return false;
             }
 
             var updatedTest = new Test

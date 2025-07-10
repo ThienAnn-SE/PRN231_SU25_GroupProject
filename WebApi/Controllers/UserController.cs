@@ -17,33 +17,33 @@ namespace WebApi.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ApiResponse<UserDto>> GetById(Guid id)
+        public async Task<ApiResponse> GetById(Guid id)
         {
             if (id == Guid.Empty)
             {
-                return ApiResponse<UserDto>.CreateBadRequestResponse("User ID is required.");
+                return ApiResponse<UserDto>.CreateResponse(System.Net.HttpStatusCode.BadRequest, false, "User ID is required.");
             }
             var response = await _userService.GetById(id);
             return response;
         }
 
         [HttpPost("login")]
-        public async Task<ApiResponse<RefreshTokenDto>> Login([FromBody] LoginDto loginDto)
+        public async Task<ApiResponse> Login([FromBody] LoginDto loginDto)
         {
             if (loginDto == null)
             {
-                ApiResponse<RefreshTokenDto>.CreateBadRequestResponse("Login data is required.");
+                ApiResponse.CreateBadRequestResponse("Login data is required.");
             }
             var response = await _userService.Login(loginDto);
             return response;
         }
 
         [HttpPost("register")]
-        public async Task<ApiResponse<BaseDto>> Register([FromBody] RegisterDto registerDto)
+        public async Task<ApiResponse> Register([FromBody] RegisterDto registerDto)
         {
             if (registerDto == null)
             {
-                ApiResponse<BaseDto>.CreateBadRequestResponse("Registration data is required.");
+                ApiResponse.CreateBadRequestResponse("Registration data is required.");
             }
             var response = await _userService.Register(registerDto);
             return response;
