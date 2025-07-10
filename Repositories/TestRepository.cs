@@ -1,4 +1,5 @@
-﻿using AppCore;
+﻿using System.Linq.Expressions;
+using AppCore;
 using AppCore.Dtos;
 using AppCore.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -33,27 +34,95 @@ namespace Repositories
 
         public Task<bool> CreateAsync(TestDto testDto, Guid? creatorId = null, CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            var filter = new Expression<Func<Test, bool>>[]
+            {
+                x => x.Title == testDto.Title
+            };
+            var existingTest = _testRepository.FindOneAsync(filter, cancellationToken: cancellationToken);
+            if (existingTest != null)
+            {
+                return Task.FromResult(false);
+            }
+
+            var newTest = new Test
+            {
+                Id = Guid.NewGuid(),
+                Title = testDto.Title,
+                Description = testDto.Description,
+                CreatedAt = DateTime.UtcNow,
+
+            };
+            return _testRepository.SaveAsync(newTest, creatorId, cancellationToken);
         }
 
         public Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            var filter = new Expression<Func<Test, bool>>[]
+            {
+                x => x.Id == id
+            };
+            var existingTest = _testRepository.FindOneAsync(filter, cancellationToken: cancellationToken);
+            if (existingTest == null)
+            {
+                return Task.FromResult(false);
+            }
+
+            return _testRepository.HardDeleteAsync(id, cancellationToken);
         }
 
         public Task<List<TestDto>> GetAll(CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            var tests = _testRepository.GetAllAsync(cancellationToken: cancellationToken);
+            return tests.ContinueWith(t => t.Result.Select(test => new TestDto
+            {
+                Id = test.Id,
+                Title = test.Title,
+                Description = test.Description,
+                CreatedAt = test.CreatedAt
+            }).ToList(), cancellationToken);
         }
 
-        public Task<TestDto?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+        public async Task<TestDto?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            var filter = new Expression<Func<Test, bool>>[]
+            {
+                x => x.Id == id
+            };
+            var existingTest = await _testRepository.FindOneAsync(filter, cancellationToken: cancellationToken);
+            if (existingTest == null)
+            {
+                return await Task.FromResult<TestDto?>(null);
+            }
+
+            return await Task.FromResult(new TestDto
+            {
+                Id = existingTest.Id,
+                Title = existingTest.Title,
+                Description = existingTest.Description,
+                CreatedAt = existingTest.CreatedAt
+            });
         }
 
-        public Task<bool> UpdateAsync(TestDto testDto, Guid? updaterId = null, CancellationToken cancellationToken = default)
+        public async Task<bool> UpdateAsync(TestDto testDto, Guid? updaterId = null, CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            var filter = new Expression<Func<Test, bool>>[]
+            {
+                x => x.Id == testDto.Id
+            };
+            var existingTest = await _testRepository.FindOneAsync(filter, cancellationToken: cancellationToken);
+            if (existingTest == null)
+            {
+                return await Task.FromResult(false);
+            }
+
+            var updatedTest = new Test
+            {
+                Id = existingTest.Id,
+                Title = testDto.Title,
+                Description = testDto.Description,
+                CreatedAt = existingTest.CreatedAt
+            };
+            return await _testRepository.SaveAsync(updatedTest, updaterId, cancellationToken);
         }
     }
 }
