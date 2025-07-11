@@ -1,0 +1,49 @@
+﻿@page
+@model RazorFrontend.Pages.Majors.IndexModel
+@{
+    ViewData["Title"] = "Majors";
+}
+
+<div class="container mt-4">
+    <h2 class="text-center mb-4">🎓 List of Majors</h2>
+
+    <div class="text-end mb-3">
+        <a class="btn btn-success" asp-page="Create">➕ Add New Major</a>
+    </div>
+
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <div class="alert alert-danger">@Model.ErrorMessage</div>
+    }
+    else if (Model.Majors?.Count > 0)
+    {
+        <table class="table table-striped">
+            <thead class="table-light">
+                <tr>
+                    <th>Name</th>
+                    <th>University</th>
+                    <th>Required Skills</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var major in Model.Majors)
+                {
+                    <tr>
+                        <td>@major.Name</td>
+                        <td>@major.UniversityId</td>
+                        <td>@major.RequiredSkills</td>
+                        <td class="text-end">
+                            <a class="btn btn-sm btn-primary" asp-page="Edit" asp-route-id="@major.Id">Edit</a>
+                            <a class="btn btn-sm btn-danger ms-2" asp-page="Delete" asp-route-id="@major.Id">Delete</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <div class="alert alert-info text-center">No majors found.</div>
+    }
+</div>
