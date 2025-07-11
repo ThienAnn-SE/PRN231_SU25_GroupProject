@@ -19,20 +19,13 @@ namespace AppCore.Extensions
         {
             services.AddDbContext<ApplicationDbContext>(options =>
             {
-                options.UseSqlServer(connectionString, sqlOptions =>
-                {
-                    sqlOptions.EnableRetryOnFailure(
-                        maxRetryCount: 5,
-                        maxRetryDelay: TimeSpan.FromSeconds(30),
-                        errorNumbersToAdd: null);
-                });
+                options.UseSqlServer(connectionString);
                 options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
                 options.EnableDetailedErrors();
             });
             
             // Register DbTransaction
-            //services.AddTransient<IDbTransaction, DbTransaction>();
-            
+            services.AddTransient<IDbTransaction, DbTransaction>();
             return services;
         }
         

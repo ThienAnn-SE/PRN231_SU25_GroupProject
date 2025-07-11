@@ -57,6 +57,10 @@ namespace Repositories
         public async Task<ExternalLoginDto?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
         {
             var entity = await _repository.FindByIdAsync(id, cancellationToken);
+            if (entity == null)
+            {
+                return null;
+            }
             return new ExternalLoginDto()
             {
                 Id = entity.Id,
@@ -80,6 +84,10 @@ namespace Repositories
             };
             
             var entity = await _repository.FindOneAsync(filters, cancellationToken: cancellationToken);
+            if (entity == null)
+            {
+                return null;
+            }
             return new ExternalLoginDto()
             {
                 Id = entity.Id,

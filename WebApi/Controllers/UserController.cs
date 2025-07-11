@@ -1,4 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using AppCore.BaseModel;
+using AppCore.Dtos;
+using Microsoft.AspNetCore.Mvc;
+using WebApi.Services;
 
 
 namespace WebApi.Controllers
@@ -7,36 +10,43 @@ namespace WebApi.Controllers
     [ApiController]
     public class UserController : ControllerBase
     {
-        // GET: api/<UserController>
-        [HttpGet]
-        public IEnumerable<string> Get()
+       private readonly IUserService _userService;
+        public UserController(IUserService userService)
         {
-            return new string[] { "value1", "value2" };
+            _userService = userService ?? throw new ArgumentNullException(nameof(userService));
         }
 
-        // GET api/<UserController>/5
         [HttpGet("{id}")]
-        public string Get(int id)
+        public async Task<ApiResponse> GetById(Guid id)
         {
-            return "value";
+            if (id == Guid.Empty)
+            {
+                return ApiResponse<UserDto>.CreateResponse(System.Net.HttpStatusCode.BadRequest, false, "User ID is required.");
+            }
+            var response = await _userService.GetById(id);
+            return response;
         }
 
-        // POST api/<UserController>
-        [HttpPost]
-        public void Post([FromBody] string value)
+        [HttpPost("login")]
+        public async Task<ApiResponse> Login([FromBody] LoginDto loginDto)
         {
+            if (loginDto == null)
+            {
+                ApiResponse.CreateBadRequestResponse("Login data is required.");
+            }
+            var response = await _userService.Login(loginDto);
+            return response;
         }
 
-        // PUT api/<UserController>/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        [HttpPost("register")]
+        public async Task<ApiResponse> Register([FromBody] RegisterDto registerDto)
         {
-        }
-
-        // DELETE api/<UserController>/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
-        {
+            if (registerDto == null)
+            {
+                ApiResponse.CreateBadRequestResponse("Registration data is required.");
+            }
+            var response = await _userService.Register(registerDto);
+            return response;
         }
     }
 }

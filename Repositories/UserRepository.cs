@@ -12,6 +12,9 @@ namespace Repositories
         Task<UserDto?> AuthenticateAsync(LoginDto loginDto, CancellationToken cancellationToken = default);
         Task<bool> RegisterAsync(RegisterDto registerDto);
         Task<bool> IsUserExistsAsync(string username);
+        Task<UserDto?> GetByUsernameAsync(string username, CancellationToken cancellationToken = default);
+        Task<UserDto?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
+        Task<List<UserDto>> GetAllAsync(CancellationToken cancellationToken = default);
     }
 
     public class UserRepository : IUserRepository
@@ -31,7 +34,7 @@ namespace Repositories
         {
             var filter = new Expression<Func<User, bool>>[]
             {
-                x => x.Email == loginDto.Email
+                x => x.Email == loginDto.UserName
             };
             var entity = await _repository
                 .FindOneAsync(filter, cancellationToken: cancellationToken);
@@ -41,7 +44,7 @@ namespace Repositories
                 return null;
             }
 
-            var isValidPassword = PasswordHasher.VerifyPassword(loginDto.Password, entity.PasswordHash, entity.Salt);
+            var isValidPassword = PasswordHasher.VerifyPassword(loginDto.Password, entity.Salt, entity.PasswordHash);
 
             var isExceedingMaxFailedAccessCount = entity.AccessFailedCount >= MaxFailedAccessCount;
             var isLockedOut = entity.LockoutEnd.HasValue && entity.LockoutEnd > DateTime.UtcNow;
@@ -60,7 +63,7 @@ namespace Repositories
             }
 
             entity.ResetAccessFailedCount();
-            await _repository.SaveAsync(entity, entity.Id, cancellationToken);
+            await _repository.UpdateAsync(entity, entity.Id, cancellationToken);
 
             return new UserDto()
             {
@@ -76,7 +79,14 @@ namespace Repositories
 
         public async Task<bool> RegisterAsync(RegisterDto registerDto)
         {
-            return await _repository.SaveAsync(new User(registerDto.UserName, registerDto.Email, registerDto.PasswordHash, registerDto.Salt), default, default);
+            var salt = GenerateSalt();
+            var hashedPassword = PasswordHasher.HashPassword(registerDto.Password, salt);
+            return await _repository.SaveAsync(new User(registerDto.UserName, registerDto.Email, hashedPassword, salt), default, default);
+        }
+
+        private static string GenerateSalt()
+        {
+            return Guid.NewGuid().ToString("N");
         }
 
         public async Task<bool> IsUserExistsAsync(string username)
@@ -87,6 +97,57 @@ namespace Repositories
             };
             var entity = await _repository.FindOneAsync(filter, cancellationToken: default);
             return entity != null;
+        }
+
+        public async Task<UserDto?> GetByUsernameAsync(string username, CancellationToken cancellationToken = default)
+        {
+            var filter = new Expression<Func<User, bool>>[]
+            {
+                x => x.Username == username
+            };
+            var entity = await _repository.FindOneAsync(filter, cancellationToken: cancellationToken);
+            if (entity == null)
+            {
+                return null;
+            }
+            return new UserDto()
+            {
+                Id = entity.Id,
+                Username = entity.Username,
+                Email = entity.Email,
+                EmailConfirmed = entity.EmailConfirmed,
+                TwoFactorEnabled = entity.TwoFactorEnabled,
+                LockoutEnd = entity.LockoutEnd,
+                AccessFailedCount = entity.AccessFailedCount
+            };
+        }
+
+        public async Task<UserDto?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+        {
+            var filters = new Expression<Func<User, bool>>[]
+            {
+                    x => x.Id == id
+            };
+            var user = await _repository.FindOneAsync(filters, cancellationToken: cancellationToken);
+            if (user == null)
+            {
+                return null;
+            }
+            return new UserDto()
+            {
+                Id = user.Id,
+                Username = user.Username,
+                Email = user.Email,
+                EmailConfirmed = user.EmailConfirmed,
+                TwoFactorEnabled = user.TwoFactorEnabled,
+                LockoutEnd = user.LockoutEnd,
+                AccessFailedCount = user.AccessFailedCount
+            };
+        }
+
+        public Task<List<UserDto>> GetAllAsync(CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
         }
     }
 }

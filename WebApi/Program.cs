@@ -1,5 +1,6 @@
 using AppCore.Extensions;
 using Repositories.Extensions;
+using WebApi.Extension;
 using WebApi.Middlewares;
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,6 +10,8 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 // Register repositories and unit of work
 builder.Services.AddRepositories(builder.Configuration.GetConnectionString("DefaultConnection"));
+builder.Services.AddServices();
+
 // Add services
 builder.Services.AddMemoryCache();
 builder.Services.Configure<FingerprintOptions>(builder.Configuration.GetSection("Fingerprint"));

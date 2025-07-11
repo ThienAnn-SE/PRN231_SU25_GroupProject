@@ -8,4 +8,11 @@ namespace AppCore.Dtos
         public string Description { get; set; } = string.Empty;
         public Guid PersonalityTypeId { get; set; }
     }
+
+    public class PersonalityDetailDto : BaseDto
+    {
+        public string Name { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+        public PersonalityTypeDto PersonalityType { get; set; } = new PersonalityTypeDto();
+    }
 }
