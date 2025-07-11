@@ -7,8 +7,8 @@ namespace WebApi.Services
     {
         Task<UniversityDto?> GetUniversityByIdAsync(Guid id, CancellationToken cancellationToken = default);
         Task<List<UniversityDto>> GetAllUniversitiesAsync(CancellationToken cancellationToken = default);
-        Task<bool> CreateUniversityAsync(UniversityDto universityDto, Guid? creatorId = null, CancellationToken cancellationToken = default);
-        Task<bool> UpdateUniversityAsync(UniversityDto universityDto, Guid? updaterId = null, CancellationToken cancellationToken = default);
+        Task<bool> CreateUniversityAsync(CreateUpdateUniversityDto universityDto, Guid? creatorId = null, CancellationToken cancellationToken = default);
+        Task<bool> UpdateUniversityAsync(Guid id, CreateUpdateUniversityDto universityDto, Guid? updaterId = null, CancellationToken cancellationToken = default);
         Task<bool> DeleteUniversityAsync(Guid id, CancellationToken cancellationToken = default);
     }
 
@@ -31,7 +31,7 @@ namespace WebApi.Services
             return await _unitOfWork.UniversityRepository.GetAll(cancellationToken);
         }
 
-        public async Task<bool> CreateUniversityAsync(UniversityDto universityDto, Guid? creatorId = null, CancellationToken cancellationToken = default)
+        public async Task<bool> CreateUniversityAsync(CreateUpdateUniversityDto universityDto, Guid? creatorId = null, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(universityDto.Name))
             {
@@ -43,14 +43,16 @@ namespace WebApi.Services
             return success;
         }
 
-        public async Task<bool> UpdateUniversityAsync(UniversityDto universityDto, Guid? updaterId = null, CancellationToken cancellationToken = default)
+        public async Task<bool> UpdateUniversityAsync(Guid id, CreateUpdateUniversityDto universityDto, Guid? updaterId = null, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(universityDto.Name))
             {
                 return false;
             }
-            return await _unitOfWork.UniversityRepository.UpdateAsync(universityDto, updaterId, cancellationToken);
+
+            return await _unitOfWork.UniversityRepository.UpdateAsync(id, universityDto, updaterId, cancellationToken);
         }
+
 
         public async Task<bool> DeleteUniversityAsync(Guid id, CancellationToken cancellationToken = default)
         {

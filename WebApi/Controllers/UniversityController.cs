@@ -39,7 +39,7 @@ namespace WebApi.Controllers
         [HttpPost]
         [ProducesResponseType(typeof(UniversityDto), 201)] 
         [ProducesResponseType(400)]
-        public async Task<IActionResult> CreateUniversity([FromBody] UniversityDto universityDto, CancellationToken cancellationToken)
+        public async Task<IActionResult> CreateUniversity([FromBody] CreateUpdateUniversityDto universityDto, CancellationToken cancellationToken)
         {
             Guid? creatorId = null; 
 
@@ -49,34 +49,19 @@ namespace WebApi.Controllers
                 ModelState.AddModelError("Name", "University with this name might already exist or name is invalid.");
                 return BadRequest(ModelState); 
             }
-            return CreatedAtAction(nameof(GetUniversityById), new { id = universityDto.Id }, universityDto);
+            return CreatedAtAction(nameof(GetUniversityById), new { id = universityDto.Name }, universityDto);
         }
 
         [HttpPut("{id}")]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
-        public async Task<IActionResult> UpdateUniversity(Guid id, [FromBody] UniversityDto universityDto, CancellationToken cancellationToken)
+        public async Task<IActionResult> Update(Guid id, [FromBody] CreateUpdateUniversityDto dto)
         {
-            if (id != universityDto.Id)
-            {
-                return BadRequest("ID in URL does not match ID in body.");
-            }
-
-            Guid? updaterId = null; 
-
-            var success = await _universityService.UpdateUniversityAsync(universityDto, updaterId, cancellationToken);
-            if (!success)
-            {
-                var existingUniversity = await _universityService.GetUniversityByIdAsync(id, cancellationToken);
-                if (existingUniversity == null)
-                {
-                    return NotFound();
-                }
-                ModelState.AddModelError("UpdateError", "Failed to update university. Check input data.");
-                return BadRequest(ModelState); 
-            }
-            return NoContent(); 
+            var result = await _universityService.UpdateUniversityAsync(id, dto);
+            if (!result)
+                return BadRequest("Update failed");
+            return Ok("Updated successfully");
         }
 
         [HttpDelete("{id}")]
