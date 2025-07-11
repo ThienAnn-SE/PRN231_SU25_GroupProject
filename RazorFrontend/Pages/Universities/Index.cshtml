@@ -1,0 +1,47 @@
+﻿@page
+@model Universities.IndexModel
+@{
+    ViewData["Title"] = "Universities";
+}
+
+<div class="container mt-4">
+    <h2 class="mb-4 text-center">🏫 List of Universities</h2>
+
+    <div class="text-end mb-3">
+        <a class="btn btn-success" asp-page="Create">➕ Add New</a>
+    </div>
+
+    @if (Model.Universities?.Count > 0)
+    {
+        <table class="table table-bordered table-striped">
+            <thead class="table-light">
+                <tr>
+                    <th>Name</th>
+                    <th>Location</th>
+                    <th>Email</th>
+                    <th>Website</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var university in Model.Universities)
+                {
+                    <tr>
+                        <td>@university.Name</td>
+                        <td>@university.Location</td>
+                        <td>@university.Email</td>
+                        <td><a href="@university.Website" target="_blank">@university.Website</a></td>
+                        <td class="text-end">
+                            <a class="btn btn-sm btn-outline-primary" asp-page="Edit" asp-route-id="@university.Id">✏️ Edit</a>
+                            <a class="btn btn-sm btn-outline-danger ms-2" asp-page="Delete" asp-route-id="@university.Id">🗑️ Delete</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <div class="alert alert-info">No universities available.</div>
+    }
+</div>
