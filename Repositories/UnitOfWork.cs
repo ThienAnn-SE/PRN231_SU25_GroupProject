@@ -26,6 +26,7 @@ namespace Repositories
         ITestSubmissionRepository TestSubmissionRepository { get; }
         ITestRepository TestRepository { get; }
         IPersonalityRepository PersonalityRepository { get; }
+        IMajorRepository MajorRepository { get; }
     }
 
     /// <summary>
@@ -45,6 +46,7 @@ namespace Repositories
         private ITestSubmissionRepository _testSubmissionRepository = null!;
         private ITestRepository _testRepoisory = null!;
         private IPersonalityRepository _personalityRepository = null!;
+        private IMajorRepository _majorRepository = null!;
 
         /// <summary>
         /// Initializes a new instance of the Unit of Work
@@ -86,6 +88,9 @@ namespace Repositories
 
         public IPersonalityRepository PersonalityRepository =>
             _personalityRepository ??= new PersonalityRepository(_dbContext, _transaction);
+
+        public IMajorRepository MajorRepository =>
+            _majorRepository ??= new MajorRepository(_dbContext, _transaction);
 
         /// <summary>
         /// Disposes the context

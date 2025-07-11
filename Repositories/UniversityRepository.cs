@@ -22,14 +22,12 @@ namespace Repositories
     public class UniversityRepository : IUniversityRepository
     {
         private readonly CrudRepository<University> _universityRepository;
-        private readonly CrudRepository<Major> _majorRepository;
 
         public UniversityRepository(
             DbContext dbContext,
             IDbTransaction transaction)
         {
             _universityRepository = new CrudRepository<University>(dbContext, transaction);
-            _majorRepository = new CrudRepository<Major>(dbContext, transaction);
         }
 
         public async Task<bool> CreateAsync(CreateUpdateUniversityDto universityDto, Guid? creatorId = null, CancellationToken cancellationToken = default)
