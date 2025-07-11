@@ -14,6 +14,7 @@ namespace Repositories.Extensions
         public static IServiceCollection AddRepositories(this IServiceCollection services, string connectionString)
         {
             services.AddAppDbContext(connectionString);
+            services.AddTransient<IUnitOfWork, UnitOfWork>();
             //services.AddScoped<IUnitOfWork, UnitOfWork>();
             return services;
         }

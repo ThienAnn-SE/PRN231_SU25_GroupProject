@@ -9,7 +9,7 @@ namespace WebApi.Services
     {
         Task<ApiResponse<UserDto>> GetById (Guid id);
         Task<ApiResponse<RefreshTokenDto>> Login(LoginDto loginDto);
-        Task<ApiResponse<BaseDto>> Register(RegisterDto registerDto);
+        Task<ApiResponse> Register(RegisterDto registerDto);
     }
 
     public class UserService : BaseService, IUserService
@@ -31,6 +31,7 @@ namespace WebApi.Services
             if (user == null)
             {
                 return ApiResponse<RefreshTokenDto>.CreateNotFoundResponse(
+                    default,
                     "User not found."
                 );
             }
@@ -43,7 +44,7 @@ namespace WebApi.Services
                 CreatedByIp = string.Empty
             };
             await unitOfWork.RefreshTokens.CreateAsync(refreshToken);
-            return ApiResponse<RefreshTokenDto>.CreateSuccessResponse(refreshToken);
+            return ApiResponse<RefreshTokenDto>.CreateResponse(System.Net.HttpStatusCode.OK, true, "Login success" ,refreshToken);
         }
 
         public static string GenerateRefreshToken()
@@ -54,7 +55,7 @@ namespace WebApi.Services
             return $"{Convert.ToBase64String(randomNumber)}{Guid.NewGuid():N}";
         }
 
-        public async Task<ApiResponse<BaseDto>> Register(RegisterDto registerDto)
+        public async Task<ApiResponse> Register(RegisterDto registerDto)
         {
             var isExist = await unitOfWork.UserAuth.IsUserExistsAsync(registerDto.UserName);
             if (isExist)
@@ -64,8 +65,7 @@ namespace WebApi.Services
                 );
             }
             var User = await unitOfWork.UserAuth.RegisterAsync(registerDto);
-            return ApiResponse<BaseDto>.CreateSuccessResponse(
-                new BaseDto(),
+            return ApiResponse.CreateSuccessResponse(
                 "User registered successfully."
             );
         }
@@ -75,9 +75,9 @@ namespace WebApi.Services
             var user = await unitOfWork.UserAuth.GetByIdAsync(id);
             if (user == null)
             {
-                return ApiResponse<UserDto>.CreateNotFoundResponse("User not found.");
+                return ApiResponse<UserDto>.CreateNotFoundResponse(default, "User not found.");
             }
-            return ApiResponse<UserDto>.CreateSuccessResponse(user, "User retrieved successfully.");
+            return ApiResponse<UserDto>.CreateResponse(System.Net.HttpStatusCode.OK, true, "User retrieved successfully.", user);
         }
     }
 }

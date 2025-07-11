@@ -1,0 +1,49 @@
+﻿@page
+@model RazorFrontend.Pages.Personalities.IndexModel
+@{
+    ViewData["Title"] = "All Personalities";
+}
+
+<div class="container mt-5">
+    <h2 class="mb-4 text-center">🧠 Personality List</h2>
+
+    <div class="text-end mb-3">
+        <a asp-page="Create" class="btn btn-success">➕ Create New Personality</a>
+    </div>
+
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <div class="alert alert-danger">@Model.ErrorMessage</div>
+    }
+    else if (Model.Personalities?.Count > 0)
+    {
+        <table class="table table-bordered table-striped">
+            <thead class="table-light">
+                <tr>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Personality Type</th>
+                    <th style="width: 150px;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var personality in Model.Personalities)
+                {
+                    <tr>
+                        <td>@personality.Name</td>
+                        <td>@personality.Description</td>
+                        <td>@personality.PersonalityType?.Name</td>
+                        <td>
+                            <a asp-page="Edit" asp-route-id="@personality.Id" class="btn btn-sm btn-primary">✏️ Edit</a>
+                            <a asp-page="Delete" asp-route-id="@personality.Id" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this?');">🗑 Delete</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <div class="alert alert-info text-center">No personality data found.</div>
+    }
+</div>
