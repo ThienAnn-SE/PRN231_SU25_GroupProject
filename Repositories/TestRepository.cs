@@ -49,6 +49,16 @@ namespace Repositories
                 Id = Guid.NewGuid(),
                 Title = testDto.Title,
                 Description = testDto.Description,
+                Questions = testDto.Questions.Select(q => new Question
+                {
+                    Id = Guid.NewGuid(),
+                    Text = q.Text,
+                    Answers = q.Answers.Select(a => new Answer
+                    {
+                        Id = Guid.NewGuid(),
+                        Text = a.Text
+                    }).ToList()
+                }).ToList(),
                 CreatedAt = DateTime.UtcNow,
 
             };
@@ -78,6 +88,16 @@ namespace Repositories
                 Id = test.Id,
                 Title = test.Title,
                 Description = test.Description,
+                Questions = test.Questions.Select(q => new QuestionDto
+                {
+                    Id = q.Id,
+                    Text = q.Text,
+                    Answers = q.Answers.Select(a => new AnswerDto
+                    {
+                        Id = a.Id,
+                        Text = a.Text
+                    }).ToList()
+                }).ToList(),
                 CreatedAt = test.CreatedAt
             }).ToList(), cancellationToken);
         }
@@ -120,6 +140,16 @@ namespace Repositories
                 Id = existingTest.Id,
                 Title = testDto.Title,
                 Description = testDto.Description,
+                Questions = testDto.Questions.Select(q => new Question
+                {
+                    Id = q.Id,
+                    Text = q.Text,
+                    Answers = q.Answers.Select(a => new Answer
+                    {
+                        Id = a.Id,
+                        Text = a.Text
+                    }).ToList()
+                }).ToList(),
                 CreatedAt = existingTest.CreatedAt
             };
             return await _testRepository.SaveAsync(updatedTest, updaterId, cancellationToken);

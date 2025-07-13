@@ -1,4 +1,5 @@
-﻿using AppCore;
+﻿using System.Linq.Expressions;
+using AppCore;
 using AppCore.Dtos;
 using AppCore.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -31,29 +32,109 @@ namespace Repositories
             _answerSubmissionRepository = new CrudRepository<AnswerSubmission>(dbContext, transaction);
         }
 
-        public Task<bool> CreateAsync(TestSubmissionDto testSubmissionDto, Guid? creatorId = null, CancellationToken cancellationToken = default)
+        public async Task<bool> CreateAsync(TestSubmissionDto testSubmissionDto, Guid? creatorId = null, CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            var filter = new Expression<Func<TestSubmission, bool>>[]
+            {
+                x => x.TestId == testSubmissionDto.TestId && x.ExamineeId == testSubmissionDto.ExamineeId
+            };
+            var existingSubmission = _testSubmissionRepository.FindOneAsync(filter, cancellationToken: cancellationToken);
+            if (existingSubmission != null)
+            {
+                return await Task.FromResult(false);
+            }
+            var newSubmission = new TestSubmission
+            {
+                Id = Guid.NewGuid(),
+                Date = testSubmissionDto.Date,
+                TestId = testSubmissionDto.TestId,
+                ExamineeId = testSubmissionDto.ExamineeId,
+                PersonalityId = testSubmissionDto.PersonalityId,
+                Answers = testSubmissionDto.Answers.Select(a => new AnswerSubmission
+                {
+                    Id = Guid.NewGuid(),
+                    AnswerId = a
+                }).ToList(),
+                CreatedAt = DateTime.UtcNow
+            };
+            return await _testSubmissionRepository.SaveAsync(newSubmission, creatorId, cancellationToken);
         }
 
-        public Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken = default)
+        public async Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            var filter = new Expression<Func<TestSubmission, bool>>[]
+            {
+                x => x.Id == id
+            };
+            var existingSubmission = await _testSubmissionRepository.FindOneAsync(filter, cancellationToken: cancellationToken);
+            if (existingSubmission == null)
+            {
+                return false;
+            }
+
+            return await _testSubmissionRepository.HardDeleteAsync(id, cancellationToken);
         }
 
-        public Task<List<TestSubmissionDto>> GetAll(CancellationToken cancellationToken = default)
+        public async Task<List<TestSubmissionDto>> GetAll(CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            var submissions = await _testSubmissionRepository.GetAllAsync(cancellationToken: cancellationToken);
+            return submissions.Select(s => new TestSubmissionDto
+            {
+                Id = s.Id,
+                Date = s.Date,
+                TestId = s.TestId,
+                ExamineeId = s.ExamineeId,
+                PersonalityId = s.PersonalityId,
+                Answers = s.Answers.Select(a => a.AnswerId).ToList()
+            }).ToList();
         }
 
-        public Task<TestSubmissionDto?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+        public async Task<TestSubmissionDto?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            var filter = new Expression<Func<TestSubmission, bool>>[]
+            {
+                x => x.Id == id
+            };
+            var existingSubmission = await _testSubmissionRepository.FindOneAsync(filter, cancellationToken: cancellationToken);
+            if (existingSubmission == null)
+            {
+                return null;
+            }
+
+            return new TestSubmissionDto
+            {
+                Id = existingSubmission.Id,
+                Date = existingSubmission.Date,
+                TestId = existingSubmission.TestId,
+                ExamineeId = existingSubmission.ExamineeId,
+                PersonalityId = existingSubmission.PersonalityId,
+                Answers = existingSubmission.Answers.Select(a => a.AnswerId).ToList()
+            };
         }
 
-        public Task<bool> UpdateAsync(TestSubmissionDto testSubmissionDto, Guid? updaterId = null, CancellationToken cancellationToken = default)
+        public async Task<bool> UpdateAsync(TestSubmissionDto testSubmissionDto, Guid? updaterId = null, CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            var filter = new Expression<Func<TestSubmission, bool>>[]
+            {
+                x => x.Id == testSubmissionDto.Id
+            };
+            var existingSubmission = await _testSubmissionRepository.FindOneAsync(filter, cancellationToken: cancellationToken);
+            if (existingSubmission == null)
+            {
+                return false;
+            }
+
+            existingSubmission.Date = testSubmissionDto.Date;
+            existingSubmission.TestId = testSubmissionDto.TestId;
+            existingSubmission.ExamineeId = testSubmissionDto.ExamineeId;
+            existingSubmission.PersonalityId = testSubmissionDto.PersonalityId;
+            existingSubmission.Answers = testSubmissionDto.Answers.Select(a => new AnswerSubmission
+            {
+                Id = Guid.NewGuid(),
+                AnswerId = a
+            }).ToList();
+
+            return await _testSubmissionRepository.SaveAsync(existingSubmission, updaterId, cancellationToken);
         }
     }
 }
