@@ -10,6 +10,7 @@ namespace Repositories
     {
         // Define methods for the PersonalityRepository here, e.g.:
         Task<PersonalityDto?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
+        Task<PersonalityDto?> GetByNameAsync(string name, CancellationToken cancellationToken = default);
         Task<PersonalityTypeDto?> GetTypeByIdAsync(Guid id, CancellationToken cancellationToken = default);
         Task<List<PersonalityDetailDto>> GetAll(CancellationToken cancellationToken = default);
         Task<List<PersonalityTypeDto>> GetTypeAll(CancellationToken cancellationToken = default);
@@ -67,6 +68,28 @@ namespace Repositories
             var filter = new Expression<Func<Personality, bool>>[]
             {
                 x => x.Id == id && x.DeletedAt == null // Assuming DeletedAt is a DateTime field indicating soft deletion
+            };
+            var personality = await _personalityRepository.FindOneAsync(filter, cancellationToken: cancellationToken);
+
+            if (personality == null)
+            {
+                return null;
+            }
+
+            return new PersonalityDto
+            {
+                Id = personality.Id,
+                Name = personality.Name,
+                Description = personality.Description,
+                PersonalityTypeId = personality.PersonalityTypeId
+            };
+        }
+
+        public async Task<PersonalityDto?> GetByNameAsync(string name, CancellationToken cancellationToken = default)
+        {
+            var filter = new Expression<Func<Personality, bool>>[]
+            {
+                x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase) && x.DeletedAt == null // Assuming DeletedAt is a DateTime field indicating soft deletion
             };
             var personality = await _personalityRepository.FindOneAsync(filter, cancellationToken: cancellationToken);
 
