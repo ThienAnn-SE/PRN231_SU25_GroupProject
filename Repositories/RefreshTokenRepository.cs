@@ -141,8 +141,12 @@ namespace Repositories
         /// </summary>
         public async Task<bool> CreateAsync(RefreshTokenDto refreshTokenDto, Guid? creatorId = null, CancellationToken cancellationToken = default)
         {
-           // var entity = _mapper.MapToEntity(refreshTokenDto);
-            return await _repository.SaveAsync(new RefreshToken(refreshTokenDto.Token, refreshTokenDto.ExpiryDate,refreshTokenDto.UserId, refreshTokenDto.CreatedByIp), creatorId, cancellationToken);
+            // var entity = _mapper.MapToEntity(refreshTokenDto);
+            var entity = new RefreshToken(refreshTokenDto.Token, refreshTokenDto.ExpiryDate, refreshTokenDto.UserId, refreshTokenDto.CreatedByIp)
+            {
+                Id = Guid.NewGuid()
+            };
+            return await _repository.SaveAsync(entity, creatorId, cancellationToken);
         }
 
         /// <summary>

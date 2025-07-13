@@ -34,15 +34,15 @@ namespace Repositories
 
         public async Task<bool> CreateAsync(TestSubmissionDto testSubmissionDto, Guid? creatorId = null, CancellationToken cancellationToken = default)
         {
-            var filter = new Expression<Func<TestSubmission, bool>>[]
-            {
-                x => x.TestId == testSubmissionDto.TestId && x.ExamineeId == testSubmissionDto.ExamineeId
-            };
-            var existingSubmission = _testSubmissionRepository.FindOneAsync(filter, cancellationToken: cancellationToken);
-            if (existingSubmission != null)
-            {
-                return await Task.FromResult(false);
-            }
+            //var filter = new Expression<Func<TestSubmission, bool>>[]
+            //{
+            //    x => x.TestId == testSubmissionDto.TestId && x.ExamineeId == testSubmissionDto.ExamineeId
+            //};
+            //var existingSubmission = await _testSubmissionRepository.FindOneAsync(filter, cancellationToken: cancellationToken);
+            //if (existingSubmission != null)
+            //{
+            //    return false;
+            //}
             var newSubmission = new TestSubmission
             {
                 Id = Guid.NewGuid(),

@@ -1,4 +1,5 @@
 using AppCore.BaseModel;
+using AppCore.Entities;
 
 namespace AppCore.Dtos
 {
@@ -36,6 +37,8 @@ namespace AppCore.Dtos
         /// Number of consecutive failed access attempts
         /// </summary>
         public int AccessFailedCount { get; set; }
+
+        public UserRole Role { get; set; } = UserRole.User;
     }
 
     public class LoginDto

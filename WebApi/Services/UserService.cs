@@ -1,14 +1,14 @@
 ﻿using AppCore.BaseModel;
 using AppCore.Dtos;
 using Repositories;
-using System.Security.Cryptography;
+using WebApi.Extension;
 
 namespace WebApi.Services
 {
     public interface IUserService
     {
         Task<ApiResponse<UserDto>> GetById (Guid id);
-        Task<ApiResponse<RefreshTokenDto>> Login(LoginDto loginDto);
+        Task<ApiResponse> Login(LoginDto loginDto, JwtOptions jwtOptions);
         Task<ApiResponse> Register(RegisterDto registerDto);
     }
 
@@ -19,12 +19,14 @@ namespace WebApi.Services
 
         }
 
-        public async Task<ApiResponse<RefreshTokenDto>> Login(LoginDto loginDto)
+        public async Task<ApiResponse> Login(LoginDto loginDto, JwtOptions jwtOptions)
         {
             var isExist = await unitOfWork.UserAuth.IsUserExistsAsync(loginDto.UserName);
             if (!isExist)
             {
-
+                return ApiResponse.CreateNotFoundResponse(
+                    "User not found."
+                );
             }
 
             var user = await unitOfWork.UserAuth.AuthenticateAsync(loginDto, CancellationToken.None);
@@ -38,21 +40,18 @@ namespace WebApi.Services
 
             var refreshToken = new RefreshTokenDto()
             {
-                Token = GenerateRefreshToken(),
-                ExpiryDate = DateTime.UtcNow.AddDays(30),
+                Token = JwtExtensions.GenerateAccessToken(user, jwtOptions),
+                ExpiryDate = DateTime.UtcNow.AddMinutes(jwtOptions.AccessTokenExpiryMinutes),
                 UserId = user.Id,
                 CreatedByIp = string.Empty
             };
-            await unitOfWork.RefreshTokens.CreateAsync(refreshToken);
+            if (! await unitOfWork.RefreshTokens.CreateAsync(refreshToken, user.Id, CancellationToken.None))
+            {
+                return ApiResponse.CreateInternalServerErrorResponse(
+                    "Failed to create refresh token."
+                );
+            }
             return ApiResponse<RefreshTokenDto>.CreateResponse(System.Net.HttpStatusCode.OK, true, "Login success" ,refreshToken);
-        }
-
-        public static string GenerateRefreshToken()
-        {
-            var randomNumber = new byte[32];
-            using var rng = RandomNumberGenerator.Create();
-            rng.GetBytes(randomNumber);
-            return $"{Convert.ToBase64String(randomNumber)}{Guid.NewGuid():N}";
         }
 
         public async Task<ApiResponse> Register(RegisterDto registerDto)
@@ -60,7 +59,7 @@ namespace WebApi.Services
             var isExist = await unitOfWork.UserAuth.IsUserExistsAsync(registerDto.UserName);
             if (isExist)
             {
-                return ApiResponse<BaseDto>.CreateBadRequestResponse(
+                return ApiResponse.CreateBadRequestResponse(
                     "User already exists."
                 );
             }

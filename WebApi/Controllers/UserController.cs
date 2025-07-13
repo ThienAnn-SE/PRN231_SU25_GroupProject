@@ -1,11 +1,14 @@
 ﻿using AppCore.BaseModel;
 using AppCore.Dtos;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using WebApi.Services;
 
 
 namespace WebApi.Controllers
 {
+    [AllowAnonymous]
     [Route("api/[controller]")]
     [ApiController]
     public class UserController : ControllerBase
@@ -28,13 +31,13 @@ namespace WebApi.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<ApiResponse> Login([FromBody] LoginDto loginDto)
+        public async Task<ApiResponse> Login([FromBody] LoginDto loginDto, [FromServices] IOptions<JwtOptions> jwtOptions)
         {
             if (loginDto == null)
             {
                 ApiResponse.CreateBadRequestResponse("Login data is required.");
             }
-            var response = await _userService.Login(loginDto);
+            var response = await _userService.Login(loginDto, jwtOptions.Value);
             return response;
         }
 

@@ -1,10 +1,16 @@
 ﻿using AppCore.BaseModel;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using System.Security.Cryptography;
 
 namespace AppCore.Entities
 {
+    public enum UserRole
+    {
+        Admin,
+        User,
+        Manager
+    }
+
     public class User : BaseEntity
     {
         protected User()
@@ -49,6 +55,8 @@ namespace AppCore.Entities
 
         /// <summary>Number of consecutive failed access attempts</summary>
         public int AccessFailedCount { get; private set; }
+
+        public UserRole Role { get; set; } = UserRole.User;
 
         /// <summary>List of refresh tokens associated with this user</summary>
         public List<RefreshToken> RefreshTokens { get; private set; }
@@ -160,6 +168,7 @@ namespace AppCore.Entities
             builder.Property(x => x.TwoFactorEnabled).IsRequired(true).HasDefaultValue(false);
             builder.Property(x => x.LockoutEnd).IsRequired(false).HasDefaultValue(null);
             builder.Property(x => x.AccessFailedCount).IsRequired(true).HasDefaultValue(0);
+            builder.Property(x => x.Role).IsRequired(true).HasConversion<string>().HasDefaultValue(UserRole.User);
 
             // Configure relationship with RefreshTokens
             builder.HasMany(x => x.RefreshTokens)

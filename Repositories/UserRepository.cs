@@ -58,7 +58,7 @@ namespace Repositories
             if (!isValidPassword)
             {
                 entity.RecordFailedAccess(MaxFailedAccessCount, TimeSpan.FromMinutes(LockoutDurationMinutes));
-                await _repository.SaveAsync(entity, entity.Id, cancellationToken);
+                await _repository.UpdateAsync(entity, entity.Id, cancellationToken);
                 return null;
             }
 
@@ -73,7 +73,8 @@ namespace Repositories
                 EmailConfirmed = entity.EmailConfirmed,
                 TwoFactorEnabled = entity.TwoFactorEnabled,
                 LockoutEnd = entity.LockoutEnd,
-                AccessFailedCount = entity.AccessFailedCount
+                AccessFailedCount = entity.AccessFailedCount,
+                Role = entity.Role
             };
         }
 
@@ -93,7 +94,7 @@ namespace Repositories
         {
             var filter = new Expression<Func<User, bool>>[]
             {
-                x => x.Username == username
+                x => x.Username.Equals(username)
             };
             var entity = await _repository.FindOneAsync(filter, cancellationToken: default);
             return entity != null;
@@ -103,7 +104,7 @@ namespace Repositories
         {
             var filter = new Expression<Func<User, bool>>[]
             {
-                x => x.Username == username
+                x => x.Username.Equals(username)
             };
             var entity = await _repository.FindOneAsync(filter, cancellationToken: cancellationToken);
             if (entity == null)
@@ -118,7 +119,8 @@ namespace Repositories
                 EmailConfirmed = entity.EmailConfirmed,
                 TwoFactorEnabled = entity.TwoFactorEnabled,
                 LockoutEnd = entity.LockoutEnd,
-                AccessFailedCount = entity.AccessFailedCount
+                AccessFailedCount = entity.AccessFailedCount,
+                Role = entity.Role
             };
         }
 
@@ -141,7 +143,8 @@ namespace Repositories
                 EmailConfirmed = user.EmailConfirmed,
                 TwoFactorEnabled = user.TwoFactorEnabled,
                 LockoutEnd = user.LockoutEnd,
-                AccessFailedCount = user.AccessFailedCount
+                AccessFailedCount = user.AccessFailedCount,
+                Role = user.Role
             };
         }
 

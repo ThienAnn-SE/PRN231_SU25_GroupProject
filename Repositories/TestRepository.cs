@@ -11,7 +11,7 @@ namespace Repositories
         // Define methods for the TestRepository here, e.g.:
         Task<TestDto?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
         Task<List<TestDto>> GetAll(CancellationToken cancellationToken = default);
-        Task<bool> CreateAsync(TestDto testDto, Guid? creatorId = null, CancellationToken cancellationToken = default);
+        Task<bool> CreateAsync(CreateTestDto testDto, Guid? creatorId = null, CancellationToken cancellationToken = default);
         Task<bool> UpdateAsync(TestDto testDto, Guid? updaterId = null, CancellationToken cancellationToken = default);
         Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken = default);
     }
@@ -19,50 +19,60 @@ namespace Repositories
     public class TestRepository : ITestRepository
     {
         private readonly CrudRepository<Test> _testRepository;
-        private readonly CrudRepository<Question> _questionRepository;
-        private readonly CrudRepository<Answer> _answerRepository;
+
+        private class TestWithIncludesRepository : CrudRepository<Test>
+        {
+            public TestWithIncludesRepository(DbContext dbContext, IDbTransaction transaction)
+                : base(dbContext, transaction) { }
+
+            protected override IQueryable<Test> IncludeProperties(DbSet<Test> dbSet)
+            {
+                return dbSet
+                    .Include(t => t.PersonalityType)
+                    .Include(t => t.Questions)
+                        .ThenInclude(q => q.Answers);
+            }
+        }
 
         public TestRepository(
             DbContext dbContext,
             IDbTransaction transaction)
         {
-            _testRepository = new CrudRepository<Test>(dbContext, transaction);
-            _questionRepository = new CrudRepository<Question>(dbContext, transaction);
-            _answerRepository = new CrudRepository<Answer>(dbContext, transaction);
+            _testRepository = new TestWithIncludesRepository(dbContext, transaction);
         }
 
-
-        public Task<bool> CreateAsync(TestDto testDto, Guid? creatorId = null, CancellationToken cancellationToken = default)
+        public async Task<bool> CreateAsync(CreateTestDto testDto, Guid? creatorId = null, CancellationToken cancellationToken = default)
         {
             var filter = new Expression<Func<Test, bool>>[]
             {
                 x => x.Title == testDto.Title
             };
-            var existingTest = _testRepository.FindOneAsync(filter, cancellationToken: cancellationToken);
+            var existingTest = await _testRepository.FindOneAsync(filter, cancellationToken: cancellationToken);
             if (existingTest != null)
             {
-                return Task.FromResult(false);
+                return false;
             }
-
-            var newTest = new Test
+            var test = new Test();
+            test.Id = Guid.NewGuid(); // Assuming you want to generate a new ID for the test
+            test.Title = testDto.Title;
+            test.Description = testDto.Description;
+            test.CreatedAt = DateTime.UtcNow; // Assuming you want to set the creation time to now
+            test.UpdatedAt = DateTime.UtcNow;
+            test.PersonalityTypeId = testDto.PersonalityTypeId; // Assuming you have a PersonalityTypeId in TestDto
+            test.CreatorId = creatorId;
+            foreach (var questionDto in testDto.Questions)
             {
-                Id = Guid.NewGuid(),
-                Title = testDto.Title,
-                Description = testDto.Description,
-                Questions = testDto.Questions.Select(q => new Question
+                var question = new Question();
+                question.Text = questionDto.Text;
+                foreach (var answerDto in questionDto.Answers)
                 {
-                    Id = Guid.NewGuid(),
-                    Text = q.Text,
-                    Answers = q.Answers.Select(a => new Answer
-                    {
-                        Id = Guid.NewGuid(),
-                        Text = a.Text
-                    }).ToList()
-                }).ToList(),
-                CreatedAt = DateTime.UtcNow,
-
-            };
-            return _testRepository.SaveAsync(newTest, creatorId, cancellationToken);
+                    var answer = new Answer();
+                    answer.Text = answerDto.Text;
+                    question.Answers.Add(answer);
+                }
+                test.Questions.Add(question);
+            }
+            return await _testRepository.SaveAsync(test, creatorId, cancellationToken);
         }
 
         public async Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken = default)
@@ -80,35 +90,35 @@ namespace Repositories
             return await _testRepository.HardDeleteAsync(id, cancellationToken);
         }
 
-        public Task<List<TestDto>> GetAll(CancellationToken cancellationToken = default)
+        public async Task<List<TestDto>> GetAll(CancellationToken cancellationToken = default)
         {
-            var tests = _testRepository.GetAllAsync(cancellationToken: cancellationToken);
-            return tests.ContinueWith(t => t.Result.Select(test => new TestDto
+            var tests = await _testRepository.GetAllAsync(cancellationToken: cancellationToken);
+            var testDtos = tests.Select(test => new TestDto
             {
                 Id = test.Id,
+                PersonalityTypeId = test.PersonalityType.Id,
                 Title = test.Title,
                 Description = test.Description,
+                CreatedAt = test.CreatedAt,
                 Questions = test.Questions.Select(q => new QuestionDto
                 {
                     Id = q.Id,
+                    TestId = test.Id,
                     Text = q.Text,
                     Answers = q.Answers.Select(a => new AnswerDto
                     {
                         Id = a.Id,
+                        QuestionId = q.Id,
                         Text = a.Text
                     }).ToList()
-                }).ToList(),
-                CreatedAt = test.CreatedAt
-            }).ToList(), cancellationToken);
+                }).ToList()
+            }).ToList();
+            return testDtos;
         }
 
         public async Task<TestDto?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
         {
-            var filter = new Expression<Func<Test, bool>>[]
-            {
-                x => x.Id == id
-            };
-            var existingTest = await _testRepository.FindOneAsync(filter, cancellationToken: cancellationToken);
+            var existingTest = await _testRepository.FindByIdAsync(id, cancellationToken: cancellationToken);
             if (existingTest == null)
             {
                 return null;
@@ -117,9 +127,22 @@ namespace Repositories
             return new TestDto
             {
                 Id = existingTest.Id,
+                PersonalityTypeId = existingTest.PersonalityType.Id,
                 Title = existingTest.Title,
                 Description = existingTest.Description,
-                CreatedAt = existingTest.CreatedAt
+                CreatedAt = existingTest.CreatedAt,
+                Questions = existingTest.Questions.Select(q => new QuestionDto
+                {
+                    Id = q.Id,
+                    TestId = existingTest.Id,
+                    Text = q.Text,
+                    Answers = q.Answers.Select(a => new AnswerDto
+                    {
+                        Id = a.Id,
+                        QuestionId = q.Id,
+                        Text = a.Text
+                    }).ToList()
+                }).ToList()
             };
         }
 

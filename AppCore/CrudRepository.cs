@@ -1,5 +1,6 @@
 ﻿using AppCore.BaseModel;
 using Microsoft.EntityFrameworkCore;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace AppCore
 {
@@ -82,12 +83,14 @@ namespace AppCore
 
         public async Task<TEntity?> FindByIdAsync(Guid id, CancellationToken cancellationToken = default)
         {
-            return await _dbSet.FirstOrDefaultAsync(x => x.Id == id && !x.DeletedAt.HasValue, cancellationToken);
+           var query = IncludeProperties(_dbSet);
+            return await query.FirstOrDefaultAsync(x => x.Id == id && !x.DeletedAt.HasValue, cancellationToken);
         }
 
         public async Task<IEnumerable<TEntity>> GetAllAsync(CancellationToken cancellationToken = default)
         {
-            return await _dbSet.Where(x => !x.DeletedAt.HasValue).ToListAsync(cancellationToken);
+            var query = IncludeProperties(_dbSet).Where(x => !x.DeletedAt.HasValue);
+            return await query.ToListAsync(cancellationToken);
         }
 
         public async Task<bool> SaveAsync(TEntity entity, Guid? creatorId, CancellationToken cancellationToken = default)
