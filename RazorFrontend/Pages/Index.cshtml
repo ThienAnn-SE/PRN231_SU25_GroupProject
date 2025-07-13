@@ -5,34 +5,63 @@
 }
 
 <div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-lg-10 text-center">
-            <h1 class="display-4 fw-bold text-primary mb-3">🧠 Discover Your Personality</h1>
-            <p class="lead text-muted mb-4">
-                Take our free MBTI-based personality test and get insights into your strengths, preferences, and potential career paths.
-            </p>
+    <div class="text-center mb-5">
+        <h1 class="display-4 fw-bold text-primary mb-3">🧠 Discover Your Personality</h1>
+        <p class="lead text-muted mb-4">
+            Take our free MBTI-based test and get matched with the right personality type, career, and university!
+        </p>
+        <img src="~/images/mbti-test.png" alt="Personality Test Illustration" class="img-fluid rounded" style="max-height: 280px;" />
+    </div>
 
-            @if (User.Identity?.IsAuthenticated ?? false)
-            {
-                <h5 class="mb-4 text-success fw-semibold">Welcome, @User.Identity.Name 👋</h5>
-                <a class="btn btn-primary btn-lg px-4 py-2 me-2" asp-page="/Test/Take">🚀 Start the Test</a>
-                <a class="btn btn-outline-danger btn-lg px-4 py-2" asp-page="/Auth/Logout">Logout</a>
-            }
-            else
-            {
-                <a class="btn btn-primary btn-lg px-4 py-2 me-2" asp-page="/Auth/Login">🔐 Log In</a>
-                <a class="btn btn-outline-secondary btn-lg px-4 py-2 me-2" asp-page="/Auth/Register">📝 Register</a>
-                <a class="btn btn-info btn-lg px-4 py-2 text-white" asp-page="/Personalities/Index">🔍 Explore Personalities</a>
-            }
-
-            <div class="mt-5 bg-white p-4 rounded shadow-sm">
-                <h4 class="mb-3">✨ Why take this test?</h4>
-                <ul class="list-unstyled benefits text-start mx-auto" style="max-width: 600px;">
-                    <li>Understand your behavior and decision-making style</li>
-                    <li>Get career recommendations that fit your personality</li>
-                    <li>Improve communication and relationships</li>
-                </ul>
+    <div class="row text-center mb-5">
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="card-title">🚀 MBTI Test</h5>
+                    <p class="card-text text-muted">Answer a few questions and find your personality type.</p>
+                    <a class="btn btn-outline-primary" asp-page="/Test/Take">Start Test</a>
+                </div>
             </div>
         </div>
+
+        <div class="col-md-3 mt-4 mt-md-0">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="card-title">🔍 Personalities</h5>
+                    <p class="card-text text-muted">Learn more about all 16 personality types.</p>
+                    <a class="btn btn-outline-info" asp-page="/Personalities/Index">View Personalities</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mt-4 mt-md-0">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="card-title">🎓 Majors</h5>
+                    <p class="card-text text-muted">Explore fields of study that match your traits.</p>
+                    <a class="btn btn-outline-warning text-dark" asp-page="/Majors/Index">View Majors</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mt-4 mt-md-0">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="card-title">🏫 Universities</h5>
+                    <p class="card-text text-muted">See universities that fit your MBTI strengths.</p>
+                    <a class="btn btn-outline-success" asp-page="/Universities/Index">View Universities</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-light rounded p-4 shadow-sm">
+        <h4 class="mb-3 text-center">✨ Why take this test?</h4>
+        <ul class="list-unstyled text-muted mx-auto" style="max-width: 700px;">
+            <li class="mb-2">✔ Understand your behavior and personality strengths</li>
+            <li class="mb-2">✔ Discover suitable careers and majors</li>
+            <li class="mb-2">✔ Match your profile with real universities</li>
+            <li class="mb-2">✔ Boost your self-awareness and communication skills</li>
+        </ul>
     </div>
 </div>

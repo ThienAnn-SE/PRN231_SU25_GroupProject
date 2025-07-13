@@ -1,126 +1,80 @@
-﻿using AppCore.BaseModel;
-using AppCore.Dtos;
+﻿using AppCore.Dtos;
 using Microsoft.AspNetCore.Mvc;
 using WebApi.Services;
 
 namespace WebApi.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
-    public class UniversityController : ControllerBase
+    [Route("api/[controller]")]
+    public class UniversityController : Controller
     {
-        private readonly IUniveristyService _universityService;
+        private readonly IUniversityService _universityService;
 
-        public UniversityController(IUniveristyService universityService)
+        public UniversityController(IUniversityService universityService)
         {
             _universityService = universityService;
         }
 
-        // Placeholder for future university-related endpoints
-        // This controller can be expanded with methods to handle university-related operations
-        [HttpGet("test")]
-        public IActionResult TestEndpoint()
+        [HttpGet]
+        [ProducesResponseType(typeof(List<UniversityDto>), 200)]
+        public async Task<IActionResult> GetAllUniversities(CancellationToken cancellationToken)
         {
-            return Ok("UniversityController is working!");
-        }
-        // Additional methods for university-related operations can be added here
-        
-        [HttpGet("{id}")]
-        public async Task<ApiResponse> GetUniversityById(Guid id)
-        {
-            if (id == Guid.Empty)
-            {
-                return ApiResponse.CreateResponse(System.Net.HttpStatusCode.BadRequest, false, "University ID is required.");
-            }
-            var response = await _universityService.GetUniversityByIdAsync(id);
-            if (response == null)
-            {
-                return ApiResponse.CreateNotFoundResponse("University not found.");
-            }
-            return response;
+            var universities = await _universityService.GetAllUniversitiesAsync(cancellationToken);
+            return Ok(universities);
         }
 
-        [HttpGet]
-        public async Task<ApiResponse> GetAllUniversities(CancellationToken cancellationToken = default)
+        [HttpGet("{id}")]
+        [ProducesResponseType(typeof(UniversityDto), 200)]
+        [ProducesResponseType(404)]
+        public async Task<IActionResult> GetUniversityById(Guid id, CancellationToken cancellationToken)
         {
-            var response = await _universityService.GetAllUniversitiesAsync(cancellationToken);
-            if (response == null)
+            var university = await _universityService.GetUniversityByIdAsync(id, cancellationToken);
+            if (university == null)
             {
-                return ApiResponse.CreateNotFoundResponse("No universities found.");
+                return NotFound(); 
             }
-            return response;
+            return Ok(university);
         }
 
         [HttpPost]
-        public async Task<ApiResponse> CreateUniversityAsync([FromBody] UniversityDto universityDto, CancellationToken cancellationToken = default)
+        [ProducesResponseType(typeof(UniversityDto), 201)] 
+        [ProducesResponseType(400)]
+        public async Task<IActionResult> CreateUniversity([FromBody] CreateUpdateUniversityDto universityDto, CancellationToken cancellationToken)
         {
-            if (universityDto == null)
+            Guid? creatorId = null; 
+
+            var success = await _universityService.CreateUniversityAsync(universityDto, creatorId, cancellationToken);
+            if (!success)
             {
-                return ApiResponse.CreateResponse(System.Net.HttpStatusCode.BadRequest, false, "University data is required.");
+                ModelState.AddModelError("Name", "University with this name might already exist or name is invalid.");
+                return BadRequest(ModelState); 
             }
-            var response = await _universityService.CreateUniversityAsync(universityDto, cancellationToken);
-            return response;
+            return CreatedAtAction(nameof(GetUniversityById), new { id = universityDto.Name }, universityDto);
         }
 
         [HttpPut("{id}")]
-        public async Task<ApiResponse> UpdateUniversityAsync(Guid id, [FromBody] UniversityDto universityDto, CancellationToken cancellationToken = default)
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
+        public async Task<IActionResult> Update(Guid id, [FromBody] CreateUpdateUniversityDto dto)
         {
-            if (id == Guid.Empty || universityDto == null)
-            {
-                return ApiResponse.CreateResponse(System.Net.HttpStatusCode.BadRequest, false, "University ID and data are required.");
-            }
-            universityDto.Id = id; // Ensure the ID in the DTO matches the route parameter
-            var response = await _universityService.UpdateUniversityAsync(universityDto, cancellationToken);
-            return response;
+            var result = await _universityService.UpdateUniversityAsync(id, dto);
+            if (!result)
+                return BadRequest("Update failed");
+            return Ok("Updated successfully");
         }
 
-        [HttpGet("majors")]
-        public async Task<ApiResponse> GetAllMajors(CancellationToken cancellationToken = default)
+        [HttpDelete("{id}")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(404)]
+        public async Task<IActionResult> DeleteUniversity(Guid id, CancellationToken cancellationToken)
         {
-            var response = await _universityService.GetAllMajors(cancellationToken);
-            if (response == null)
+            var success = await _universityService.DeleteUniversityAsync(id, cancellationToken);
+            if (!success)
             {
-                return ApiResponse.CreateNotFoundResponse("No majors found.");
+                return NotFound(); 
             }
-            return response;
-        }
-
-        [HttpGet("majors/{id}")]
-        public async Task<ApiResponse> GetMajorById(Guid id, CancellationToken cancellationToken = default)
-        {
-            if (id == Guid.Empty)
-            {
-                return ApiResponse.CreateResponse(System.Net.HttpStatusCode.BadRequest, false, "Major ID is required.");
-            }
-            var response = await _universityService.GetMajorById(id, cancellationToken);
-            if (response == null)
-            {
-                return ApiResponse.CreateNotFoundResponse("Major not found.");
-            }
-            return response;
-        }
-
-        [HttpPost("majors")]
-        public async Task<ApiResponse> CreateMajorAsync([FromBody] MajorDto majorDto, CancellationToken cancellationToken = default)
-        {
-            if (majorDto == null)
-            {
-                return ApiResponse.CreateResponse(System.Net.HttpStatusCode.BadRequest, false, "Major data is required.");
-            }
-            var response = await _universityService.CreateMajorAsync(majorDto, cancellationToken);
-            return response;
-        }
-
-        [HttpPut("majors/{id}")]
-        public async Task<ApiResponse> UpdateMajorByIdAsync(Guid id, [FromBody] MajorDto majorDto, CancellationToken cancellationToken = default)
-        {
-            if (id == Guid.Empty || majorDto == null)
-            {
-                return ApiResponse.CreateResponse(System.Net.HttpStatusCode.BadRequest, false, "Major ID and data are required.");
-            }
-            majorDto.Id = id; // Ensure the ID in the DTO matches the route parameter
-            var response = await _universityService.UpdateMajorByIdAsync(majorDto, cancellationToken);
-            return response;
+            return NoContent(); 
         }
     }
 }

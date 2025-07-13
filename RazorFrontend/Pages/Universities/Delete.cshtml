@@ -1,0 +1,41 @@
+﻿@page "{id:guid}"
+@model RazorFrontend.Pages.Universities.DeleteModel
+@{
+    ViewData["Title"] = "Delete University";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <h2 class="mb-4 text-danger text-center">⚠️ Delete University</h2>
+
+            @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+            {
+                <div class="alert alert-danger">@Model.ErrorMessage</div>
+            }
+
+            <div class="alert alert-warning">
+                <strong>Are you sure you want to delete the following university?</strong>
+            </div>
+
+            <dl class="row">
+                <dt class="col-sm-3">Name</dt>
+                <dd class="col-sm-9">@Model.University?.Name</dd>
+
+                <dt class="col-sm-3">Location</dt>
+                <dd class="col-sm-9">@Model.University?.Location</dd>
+
+                <dt class="col-sm-3">Email</dt>
+                <dd class="col-sm-9">@Model.University?.Email</dd>
+
+                <dt class="col-sm-3">Website</dt>
+                <dd class="col-sm-9">@Model.University?.Website</dd>
+            </dl>
+
+            <form method="post">
+                <button type="submit" class="btn btn-danger">Delete</button>
+                <a asp-page="Index" class="btn btn-secondary ms-2">Cancel</a>
+            </form>
+        </div>
+    </div>
+</div>

@@ -11,7 +11,8 @@ namespace WebApi.Extension
             services.AddScoped<ITestService, TestService>();
             services.AddScoped<IUserProfileService, UserProfileService>();
             services.AddScoped<ITestSubmissionService, TestSubmissionService>();
-            services.AddScoped<IUniveristyService, UniveristyService>();
+            services.AddScoped<IUniversityService, UniversityService>();
+            services.AddScoped<IMajorService, MajorService>();
             return services;
         }
     }

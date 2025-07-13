@@ -7,4 +7,10 @@ namespace AppCore.Dtos
         public string Name { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
     }
+
+    //public class CreateUpdatePersonalityTypeDto
+    //{
+    //    public string Name { get; set; } = string.Empty;
+    //    public string Description { get; set; } = string.Empty;
+    //}
 }
