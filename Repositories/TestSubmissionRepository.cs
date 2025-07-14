@@ -22,14 +22,25 @@ namespace Repositories
     public class TestSubmissionRepository : ITestSubmissionRepository
     {
         private readonly CrudRepository<TestSubmission> _testSubmissionRepository;
-        private readonly CrudRepository<AnswerSubmission> _answerSubmissionRepository;
+        private class TestSubmissionWithIncludesRepository : CrudRepository<TestSubmission>
+        {
+            public TestSubmissionWithIncludesRepository(DbContext dbContext, IDbTransaction transaction)
+                : base(dbContext, transaction) { }
+            protected override IQueryable<TestSubmission> IncludeProperties(DbSet<TestSubmission> dbSet)
+            {
+                return dbSet
+                    .Include(ts => ts.Examinee)
+                    .Include(ts => ts.Personality)
+                    .Include(ts => ts.Answers)
+                        .ThenInclude(a => a.Answer);
+            }
+        }
 
         public TestSubmissionRepository(
             DbContext dbContext,
             IDbTransaction transaction)
         {
-            _testSubmissionRepository = new CrudRepository<TestSubmission>(dbContext, transaction);
-            _answerSubmissionRepository = new CrudRepository<AnswerSubmission>(dbContext, transaction);
+            _testSubmissionRepository = new TestSubmissionWithIncludesRepository(dbContext, transaction);
         }
 
         public async Task<bool> CreateAsync(TestSubmissionDto testSubmissionDto, Guid? creatorId = null, CancellationToken cancellationToken = default)

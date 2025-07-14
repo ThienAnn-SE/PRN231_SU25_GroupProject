@@ -74,14 +74,28 @@ namespace WebApi.Services
             return ApiResponse.CreateSuccessResponse("Test submission created successfully.");
         }
 
-        public Task<ApiResponse> GetAllAsync(CancellationToken cancellationToken = default)
+        public async Task<ApiResponse> GetAllAsync(CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            var submissions = await unitOfWork.TestSubmissionRepository.GetAll(cancellationToken);
+            if (submissions == null || !submissions.Any())
+            {
+                return ApiResponse.CreateNotFoundResponse("No test submissions found.");
+            }
+            return ApiResponses<TestSubmissionDto>.CreateResponse(System.Net.HttpStatusCode.OK, true, "Retrieved test submissions successfully.", submissions);
         }
 
-        public Task<ApiResponse> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+        public async Task<ApiResponse> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            if (id == Guid.Empty)
+            {
+                return ApiResponse.CreateBadRequestResponse("Test submission ID is required.");
+            }
+            var submission = await unitOfWork.TestSubmissionRepository.GetByIdAsync(id, cancellationToken);
+            if (submission == null)
+            {
+                return ApiResponse.CreateNotFoundResponse("Test submission not found.");
+            }
+            return ApiResponse<TestSubmissionDto>.CreateResponse(System.Net.HttpStatusCode.OK, true, "Retrived Testsubmission successfuly", submission);
         }
 
         private async Task<Guid> CalculateMBTIResult(TestDto test, List<Guid> answers)
