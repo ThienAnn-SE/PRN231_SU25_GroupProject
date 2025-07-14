@@ -1,4 +1,5 @@
-﻿using AppCore.Dtos;
+﻿using AppCore.BaseModel;
+using AppCore.Dtos;
 using Microsoft.AspNetCore.Mvc;
 using WebApi.Services;
 
@@ -16,64 +17,96 @@ namespace WebApi.Controllers
         }
 
         [HttpGet]
-        [ProducesResponseType(typeof(List<MajorDto>), 200)]
-        public async Task<IActionResult> GetAllMajors(CancellationToken cancellationToken)
+        public async Task<ApiResponse> GetAllMajors()
         {
-            var majors = await _majorService.GetAllMajorsAsync(cancellationToken);
-            return Ok(majors);
+            var majors = await _majorService.GetAllMajorsAsync();
+            if (majors == null)
+            {
+                return ApiResponse.CreateNotFoundResponse("No majors found.");
+            }
+            return majors;
         }
 
         [HttpGet("{id}")]
-        [ProducesResponseType(typeof(MajorDto), 200)]
-        [ProducesResponseType(404)]
-        public async Task<IActionResult> GetMajorById(Guid id, CancellationToken cancellationToken)
+        public async Task<ApiResponse> GetMajorById(Guid id)
         {
-            var major = await _majorService.GetMajorByIdAsync(id, cancellationToken);
+            if (id == Guid.Empty)
+            {
+                return ApiResponse.CreateBadRequestResponse("Major ID is required.");
+            }
+            var major = await _majorService.GetMajorByIdAsync(id);
             if (major == null)
             {
-                return NotFound();
+                return ApiResponse.CreateNotFoundResponse("No major found with the given ID.");
             }
-            return Ok(major);
+            return major;
         }
 
         [HttpPost]
-        [ProducesResponseType(typeof(MajorDto), 201)]
-        [ProducesResponseType(400)]
-        public async Task<IActionResult> CreateMajor([FromBody] CreateUpdateMajorDto majorDto, CancellationToken cancellationToken)
+        public async Task<ApiResponse> CreateMajor([FromBody] CreateUpdateMajorDto majorDto)
         {
-            Guid? creatorId = null;
-            var success = await _majorService.CreateMajorAsync(majorDto, creatorId, cancellationToken);
-            if (!success)
+            if (majorDto == null)
             {
-                ModelState.AddModelError("Name", "Major with this name might already exist or name is invalid.");
-                return BadRequest(ModelState);
+                return ApiResponse.CreateBadRequestResponse("Major data is required.");
             }
-            return CreatedAtAction(nameof(GetMajorById), new { id = majorDto.Name }, majorDto);
+            return await _majorService.CreateMajorAsync(majorDto);
         }
 
-        [HttpPut("{id}")]
-        [ProducesResponseType(204)]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(404)]
-        public async Task<IActionResult> Update(Guid id, [FromBody] CreateUpdateMajorDto dto, CancellationToken cancellationToken)
+        [HttpGet("Personality/{id}")]
+        public async Task<ApiResponse> GetMajorPersonalities(Guid id)
         {
-            var result = await _majorService.UpdateMajorAsync(id, dto);
-            if (!result)
-                return BadRequest("Update failed");
-            return Ok("Updated successfully");
+            if (id == Guid.Empty)
+            {
+                return ApiResponse.CreateBadRequestResponse("Major ID is required.");
+            }
+            var personalities = await _majorService.GetMajorsByPersonalityIdAsync(id);
+            return personalities;
         }
 
-        [HttpDelete("{id}")]
-        [ProducesResponseType(204)]
-        [ProducesResponseType(404)]
-        public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
+
+        [HttpPost("Personality")]
+        public async Task<ApiResponse> AddPersonalityToMajor([FromBody] MajorPersonalityDto majorPersonalityDto)
         {
-            var success = await _majorService.DeleteMajorAsync(id, cancellationToken);
-            if (!success)
+            if (majorPersonalityDto == null)
             {
-                return NotFound();
+                return ApiResponse.CreateBadRequestResponse("Major ID and personality data are required.");
             }
-            return NoContent();
+            return await _majorService.AddNewPersonalityToMajorAsync(majorPersonalityDto);
         }
+
+        [HttpDelete("Personality")]
+        public async Task<ApiResponse> DeletePersonalityFromMajor([FromBody] MajorPersonalityDto majorPersonalityDto)
+        {
+            if (majorPersonalityDto == null)
+            {
+                return ApiResponse.CreateBadRequestResponse("Major ID and personality data are required.");
+            }
+            return await _majorService.DeletePersonalityFromMajorAsync(majorPersonalityDto);
+        }
+
+        //[HttpPut("{id}")]
+        //[ProducesResponseType(204)]
+        //[ProducesResponseType(400)]
+        //[ProducesResponseType(404)]
+        //public async Task<IActionResult> Update(Guid id, [FromBody] CreateUpdateMajorDto dto, CancellationToken cancellationToken)
+        //{
+        //    var result = await _majorService.UpdateMajorAsync(id, dto);
+        //    if (!result)
+        //        return BadRequest("Update failed");
+        //    return Ok("Updated successfully");
+        //}
+
+        //[HttpDelete("{id}")]
+        //[ProducesResponseType(204)]
+        //[ProducesResponseType(404)]
+        //public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
+        //{
+        //    var success = await _majorService.DeleteMajorAsync(id, cancellationToken);
+        //    if (!success)
+        //    {
+        //        return NotFound();
+        //    }
+        //    return NoContent();
+        //}
     }
 }

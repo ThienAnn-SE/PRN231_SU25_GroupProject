@@ -87,7 +87,7 @@ namespace Repositories
 
         public async Task<PersonalityDto?> GetByNameAsync(string name, CancellationToken cancellationToken = default)
         {
-            var filter = new Expression<Func<Personality, bool>>[]
+             var filter = new Expression<Func<Personality, bool>>[]
             {
                 x => x.Name == name && !x.DeletedAt.HasValue // Assuming DeletedAt is a DateTime field indicating soft deletion
             };
