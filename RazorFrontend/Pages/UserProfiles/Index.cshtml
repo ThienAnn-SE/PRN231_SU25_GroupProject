@@ -1,0 +1,50 @@
+﻿@page
+@model RazorFrontend.Pages.UserProfiles.IndexModel
+@{
+    ViewData["Title"] = "User Profiles";
+}
+
+<div class="container mt-4">
+    <h2 class="text-center mb-4">👤 User Profiles</h2>
+
+    <div class="text-end mb-3">
+        <a class="btn btn-success" asp-page="Create">➕ Add Profile</a>
+    </div>
+
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <div class="alert alert-danger">@Model.ErrorMessage</div>
+    }
+    else if (Model.Profiles?.Count > 0)
+    {
+        <table class="table table-striped">
+            <thead class="table-light">
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Gender</th>
+                    <th>Date of Birth</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var profile in Model.Profiles)
+                {
+                    <tr>
+                        <td>@profile.FullName</td>
+                        <td><i>Linked User</i></td> <!-- Chưa có email trong DTO -->
+                        <td>@profile.Gender</td>
+                        <td>@profile.DayOfBirth.ToShortDateString()</td>
+                        <td class="text-end">
+                            <a class="btn btn-sm btn-primary" asp-page="Edit" asp-route-id="@profile.Id">Edit</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <div class="alert alert-info">No profiles found.</div>
+    }
+</div>
