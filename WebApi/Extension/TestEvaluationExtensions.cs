@@ -1,7 +1,12 @@
-﻿using AppCore.Dtos;
-
-namespace WebApi.Extension
+﻿namespace WebApi.Extension
 {
+    public class TestResource
+    {
+        public const int MBTIQuestionCount = 50;
+        public const int DISCQuestionCount = 28;
+        public const int OCEANQuestionCount = 10;
+    }
+
     public static class TestEvaluationExtensions
     {
         private enum MBTIDimension

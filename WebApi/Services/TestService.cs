@@ -1,6 +1,7 @@
 ﻿using AppCore.BaseModel;
 using AppCore.Dtos;
 using Repositories;
+using WebApi.Extension;
 
 namespace WebApi.Services
 {
@@ -53,7 +54,7 @@ namespace WebApi.Services
             switch (personalityType.Name)
             {
                 case "MBTI":
-                    if (testDto.Questions.Count != 50)
+                    if (testDto.Questions.Count != TestResource.MBTIQuestionCount)
                     {
                         return ApiResponse.CreateBadRequestResponse("MBTI tests must have 50 questions.");
                     }
@@ -63,7 +64,7 @@ namespace WebApi.Services
                     }
                     break;
                 case "OCEAN":
-                    if (testDto.Questions.Count != 10)
+                    if (testDto.Questions.Count != TestResource.OCEANQuestionCount)
                     {
                         return ApiResponse.CreateBadRequestResponse("OCEAN tests must have 10 questions.");
                     }
@@ -73,7 +74,7 @@ namespace WebApi.Services
                     }
                     break;
                 case "DISC":
-                    if (testDto.Questions.Count != 28)
+                    if (testDto.Questions.Count != TestResource.DISCQuestionCount)
                     {
                         return ApiResponse.CreateBadRequestResponse("DISC tests must have 28 questions.");
                     }
