@@ -2,12 +2,16 @@
 using AppCore.Dtos;
 using AppCore.Entities;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace Repositories
 {
     public interface IUserProfileRepository
     {
         Task<UserProfileDto?> GetProfileAsync(Guid userId, CancellationToken cancellation = default);
+        Task<UserProfileDto?> GetProfileByAuthIdAsync(Guid userAuthId, CancellationToken cancellation = default);
+        Task<List<UserProfileDto>> GetAllProfilesAsync(CancellationToken cancellation = default);
+        Task<bool> CreateAsync(CreateUserProfileDto profileDto, CancellationToken cancellation = default);
         Task<bool> UpdateProfileAsync(UserProfileDto profile);
     }
 
@@ -20,6 +24,46 @@ namespace Repositories
             IDbTransaction transaction)
         {
             _repository = new CrudRepository<UserProfile>(dbContext, transaction);
+        }
+
+        public async Task<bool> CreateAsync(CreateUserProfileDto profileDto, CancellationToken cancellation = default)
+        {
+            var newProfile = new UserProfile
+            {
+                Id = Guid.NewGuid(),
+                FirstName = profileDto.FirstName,
+                LastName = profileDto.LastName,
+                DayOfBirth = profileDto.DayOfBirth,
+                UserAuthId = profileDto.UserAuthId,
+                Gender = profileDto.Gender,
+                Address = profileDto.Address,
+                ProfilePictureUrl = profileDto.ProfilePictureUrl
+            };
+            return await _repository.SaveAsync(newProfile, profileDto.UserAuthId, cancellation);
+        }
+
+        public async Task<List<UserProfileDto>> GetAllProfilesAsync(CancellationToken cancellation = default)
+        {
+            var filter = new Expression<Func<UserProfile, bool>>[]
+            {
+                x => x.DeletedAt == null // Assuming DeletedAt is a DateTime field indicating soft deletion
+            };
+            var profiles = await _repository.FindAsync(filter);
+            if (profiles == null || !profiles.Any())
+            {
+                return new List<UserProfileDto>();
+            }
+            return profiles.Select(p => new UserProfileDto
+            {
+                Id = p.Id,
+                FirstName = p.FirstName,
+                LastName = p.LastName,
+                DayOfBirth = p.DayOfBirth,
+                UserAuthId = p.UserAuthId,
+                Gender = p.Gender,
+                Address = p.Address,
+                ProfilePictureUrl = p.ProfilePictureUrl
+            }).ToList();
         }
 
         public async Task<UserProfileDto?> GetProfileAsync(Guid userId, CancellationToken cancellation = default)
@@ -41,6 +85,34 @@ namespace Repositories
                 ProfilePictureUrl = entity.ProfilePictureUrl,
                 UserAuthId = entity.UserAuthId
             };
+        }
+
+        public async Task<UserProfileDto?> GetProfileByAuthIdAsync(Guid userAuthId, CancellationToken cancellation = default)
+        {
+            if (userAuthId == Guid.Empty)
+            {
+                return null;
+            }
+            var filter = new Expression<Func<UserProfile, bool>>[]
+            {
+                x => x.UserAuthId == userAuthId
+            };
+            var entity = await _repository.FindOneAsync(filter);
+            if (entity == null)
+            {
+                return null;
+            }
+            return new UserProfileDto()
+            {
+                Id = entity.Id,
+                FirstName = entity.FirstName,
+                LastName = entity.LastName,
+                DayOfBirth = entity.DayOfBirth,
+                Gender = entity.Gender,
+                Address = entity.Address,
+                ProfilePictureUrl = entity.ProfilePictureUrl,
+                UserAuthId = entity.UserAuthId
+                };
         }
 
         public async Task<bool> UpdateProfileAsync(UserProfileDto profile)

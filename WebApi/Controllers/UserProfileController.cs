@@ -52,13 +52,13 @@ namespace WebApi.Controllers
         }
 
         [HttpPost]
-        public async Task<ApiResponse> CreateUserProfileAsync([FromBody] UserProfileDto userProfileDto, CancellationToken cancellationToken = default)
+        public async Task<ApiResponse> CreateUserProfileAsync([FromBody] CreateUserProfileDto createUserProfileDto, CancellationToken cancellationToken = default)
         {
-            if (userProfileDto == null)
+            if (createUserProfileDto == null)
             {
                 return ApiResponse.CreateResponse(System.Net.HttpStatusCode.BadRequest, false, "User Profile data is required.");
             }
-            var response = await _userProfileService.CreateUserProfileAsync(userProfileDto, cancellationToken);
+            var response = await _userProfileService.CreateUserProfileAsync(createUserProfileDto, cancellationToken);
             return response;
         }
 

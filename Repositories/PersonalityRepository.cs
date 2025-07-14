@@ -89,7 +89,7 @@ namespace Repositories
         {
             var filter = new Expression<Func<Personality, bool>>[]
             {
-                x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase) && x.DeletedAt == null // Assuming DeletedAt is a DateTime field indicating soft deletion
+                x => x.Name == name && !x.DeletedAt.HasValue // Assuming DeletedAt is a DateTime field indicating soft deletion
             };
             var personality = await _personalityRepository.FindOneAsync(filter, cancellationToken: cancellationToken);
 

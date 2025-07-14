@@ -7,7 +7,7 @@ namespace AppCore.Dtos
         public DateTime Date { get; set; }
         public Guid TestId { get; set; }
         public Guid ExamineeId { get; set; }
-        public Guid PersonalityId { get; set; }
+        public Guid PersonalityId { get; set; } = Guid.Empty;
         public List<Guid> Answers { get; set; } = new List<Guid>();
     }
 }
