@@ -72,10 +72,14 @@ namespace Repositories
             return _universityRepository.HardDeleteAsync(id, cancellationToken);
         }
 
-        public Task<List<UniversityDto>> GetAll(CancellationToken cancellationToken = default)
+        public async Task<List<UniversityDto>> GetAll(CancellationToken cancellationToken = default)
         {
-            var universities = _universityRepository.GetAllAsync(cancellationToken: cancellationToken);
-            return universities.ContinueWith(t => t.Result.Select(university => new UniversityDto
+            var universities = await _universityRepository.GetAllAsync(cancellationToken: cancellationToken);
+            if (universities == null || !universities.Any())
+            {
+                return new List<UniversityDto>();
+            }
+            return universities.Select(university => new UniversityDto
             {
                 Id = university.Id,
                 Name = university.Name,
@@ -85,7 +89,7 @@ namespace Repositories
                 Website = university.Website,
                 Description = university.Description,
                 CreatedAt = university.CreatedAt
-            }).ToList(), cancellationToken);
+            }).ToList();
         }
 
         public async Task<UniversityDto?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
@@ -97,10 +101,10 @@ namespace Repositories
             var existingUniversity = await _universityRepository.FindOneAsync(filter, cancellationToken: cancellationToken);
             if (existingUniversity == null)
             {
-                return await Task.FromResult<UniversityDto?>(null);
+                return null;
             }
 
-            return await Task.FromResult(new UniversityDto
+            return new UniversityDto
             {
                 Id = existingUniversity.Id,
                 Name = existingUniversity.Name,
@@ -110,16 +114,15 @@ namespace Repositories
                 Website = existingUniversity.Website,
                 Description = existingUniversity.Description,
                 CreatedAt = existingUniversity.CreatedAt
-            });
+            };
         }
 
         public async Task<bool> UpdateAsync(Guid id, CreateUpdateUniversityDto dto, Guid? updaterId = null, CancellationToken cancellationToken = default)
         {
             var existingUniversity = await _universityRepository.FindOneAsync(
-                new Expression<Func<University, bool>>[]
-                {
-            x => x.Id == id
-                },
+                [
+                    x => x.Id == id
+                ],
                 cancellationToken: cancellationToken
             );
 
@@ -127,12 +130,12 @@ namespace Repositories
                 return false;
 
             var duplicateNameUniversity = await _universityRepository.FindOneAsync(
-                new Expression<Func<University, bool>>[]
-                {
+                [
                     x => x.Name == dto.Name && x.Id != id
-                },
+                ],
                 cancellationToken: cancellationToken
             );
+
             if (duplicateNameUniversity != null)
                 return false;
 

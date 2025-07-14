@@ -1,4 +1,5 @@
-﻿using AppCore.Dtos;
+﻿using AppCore.BaseModel;
+using AppCore.Dtos;
 using Microsoft.AspNetCore.Mvc;
 using WebApi.Services;
 
@@ -16,65 +17,68 @@ namespace WebApi.Controllers
         }
 
         [HttpGet]
-        [ProducesResponseType(typeof(List<UniversityDto>), 200)]
-        public async Task<IActionResult> GetAllUniversities(CancellationToken cancellationToken)
+        public async Task<ApiResponse> GetAllUniversities(CancellationToken cancellationToken)
         {
             var universities = await _universityService.GetAllUniversitiesAsync(cancellationToken);
-            return Ok(universities);
+            if (universities == null)
+            {
+                return ApiResponse.CreateNotFoundResponse("No universities found.");
+            }
+            return universities;
         }
 
         [HttpGet("{id}")]
-        [ProducesResponseType(typeof(UniversityDto), 200)]
-        [ProducesResponseType(404)]
-        public async Task<IActionResult> GetUniversityById(Guid id, CancellationToken cancellationToken)
+        public async Task<ApiResponse> GetUniversityById(Guid id, CancellationToken cancellationToken)
         {
             var university = await _universityService.GetUniversityByIdAsync(id, cancellationToken);
             if (university == null)
             {
-                return NotFound(); 
+                return ApiResponse.CreateNotFoundResponse("No university existed with given ID"); 
             }
-            return Ok(university);
+            return university;
         }
 
         [HttpPost]
-        [ProducesResponseType(typeof(UniversityDto), 201)] 
-        [ProducesResponseType(400)]
-        public async Task<IActionResult> CreateUniversity([FromBody] CreateUpdateUniversityDto universityDto, CancellationToken cancellationToken)
+        public async Task<ApiResponse> CreateUniversity([FromBody] CreateUpdateUniversityDto universityDto, CancellationToken cancellationToken)
         {
-            Guid? creatorId = null; 
-
-            var success = await _universityService.CreateUniversityAsync(universityDto, creatorId, cancellationToken);
-            if (!success)
+            if (universityDto == null)
             {
-                ModelState.AddModelError("Name", "University with this name might already exist or name is invalid.");
-                return BadRequest(ModelState); 
+                return ApiResponse.CreateBadRequestResponse("University data is required.");
             }
-            return CreatedAtAction(nameof(GetUniversityById), new { id = universityDto.Name }, universityDto);
+            var result = await _universityService.CreateUniversityAsync(universityDto);
+            return result;
         }
 
         [HttpPut("{id}")]
-        [ProducesResponseType(204)]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(404)]
-        public async Task<IActionResult> Update(Guid id, [FromBody] CreateUpdateUniversityDto dto)
+        public async Task<ApiResponse> Update(Guid id, [FromBody] CreateUpdateUniversityDto dto)
         {
+            if (dto == null)
+            {
+                return ApiResponse.CreateBadRequestResponse("University data is required.");
+            }
+            if (id == Guid.Empty)
+            {
+                return ApiResponse.CreateBadRequestResponse("University ID is required.");
+            }
             var result = await _universityService.UpdateUniversityAsync(id, dto);
-            if (!result)
-                return BadRequest("Update failed");
-            return Ok("Updated successfully");
+            if (result == null)
+            {
+                return ApiResponse.CreateNotFoundResponse("University does not exist with given ID.");
+            }
+            return result;
         }
 
-        [HttpDelete("{id}")]
-        [ProducesResponseType(204)]
-        [ProducesResponseType(404)]
-        public async Task<IActionResult> DeleteUniversity(Guid id, CancellationToken cancellationToken)
-        {
-            var success = await _universityService.DeleteUniversityAsync(id, cancellationToken);
-            if (!success)
-            {
-                return NotFound(); 
-            }
-            return NoContent(); 
-        }
+        //[HttpDelete("{id}")]
+        //[ProducesResponseType(204)]
+        //[ProducesResponseType(404)]
+        //public async Task<IActionResult> DeleteUniversity(Guid id, CancellationToken cancellationToken)
+        //{
+        //    var success = await _universityService.DeleteUniversityAsync(id, cancellationToken);
+        //    if (!success)
+        //    {
+        //        return NotFound(); 
+        //    }
+        //    return NoContent(); 
+        //}
     }
 }

@@ -1,7 +1,6 @@
 ﻿using AppCore.BaseModel;
 using AppCore.Dtos;
 using Repositories;
-using System.Threading.Tasks;
 using WebApi.Extension;
 
 namespace WebApi.Services
@@ -51,7 +50,7 @@ namespace WebApi.Services
             }
             if (personalityType.Name == "MBTI" )
             {
-                if (testSubmissionDto.Answers.Count != 50)
+                if (testSubmissionDto.Answers.Count != TestResource.MBTIQuestionCount)
                 {
                     return ApiResponse.CreateBadRequestResponse("MBTI tests must have exactly 50 answers.");
                 }
@@ -59,7 +58,7 @@ namespace WebApi.Services
             }
             else if (personalityType.Name == "DISC")
             {
-                if (testSubmissionDto.Answers.Count != 28)
+                if (testSubmissionDto.Answers.Count != TestResource.DISCQuestionCount)
                 {
                     return ApiResponse.CreateBadRequestResponse("DISC tests must have exactly 28 answers.");
                 }
