@@ -1,4 +1,6 @@
-﻿namespace WebApi.Extension
+﻿using AppCore.Dtos;
+
+namespace WebApi.Extension
 {
     public class TestResource
     {
@@ -74,6 +76,54 @@
                 traitScores[MBTITrait.T] >= traitScores[MBTITrait.F] ? "T" : "F",
                 traitScores[MBTITrait.J] >= traitScores[MBTITrait.P] ? "J" : "P"
             );
+        }
+
+        public static string EvaluateOceanTest(List<int> userAnswers)
+        {
+            var scores = new Dictionary<string, int> { { "O", 0 }, { "C", 0 }, { "E", 0 }, { "A", 0 }, { "N", 0 } };
+            var reverseScoredIndexes = new HashSet<int> { 1, 3, 5, 7, 9 };
+
+            for (int i = 0; i < userAnswers.Count; i++)
+            {
+                string trait = GetTraitByQuestionIndex(i);
+                int score = reverseScoredIndexes.Contains(i) ? 6 - userAnswers[i] : userAnswers[i];
+                scores[trait] += score;
+            }
+            var result = GetDominantTrait(scores);
+            if (result == "?")
+            {
+                throw new InvalidOperationException("Could not determine dominant trait.");
+            }
+            return result;
+        }
+
+
+        private static string GetDominantTrait(Dictionary<string, int> scores)
+        {
+            var dominant = scores.OrderByDescending(kvp => kvp.Value).First();
+            return dominant.Key switch
+            {
+                "O" => "Openness",
+                "C" => "Conscientiousness",
+                "E" => "Extraversion",
+                "A" => "Agreeableness",
+                "N" => "Neuroticism",
+                _ => "Unknown"
+            };
+        }
+
+
+        private static string GetTraitByQuestionIndex(int index)
+        {
+            return index switch
+            {
+                0 or 1 => "O", // Openness
+                2 or 3 => "C", // Conscientiousness
+                4 or 5 => "E", // Extraversion
+                6 or 7 => "A", // Agreeableness
+                8 or 9 => "N", // Neuroticism
+                _ => "?"
+            };
         }
     }
 }

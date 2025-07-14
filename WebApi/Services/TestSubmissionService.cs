@@ -56,6 +56,14 @@ namespace WebApi.Services
                 }
                 testSubmissionDto.PersonalityId = await CalculateMBTIResult(test, testSubmissionDto.Answers);
             }
+            else if (personalityType.Name == "OCEAN")
+            {
+                if (testSubmissionDto.Answers.Count != TestResource.OCEANQuestionCount)
+                {
+                    return ApiResponse.CreateBadRequestResponse("OCEAN tests must have exactly 10 answers.");
+                }
+                testSubmissionDto.PersonalityId = await CalculateOCEANResult(test, testSubmissionDto.Answers);
+            }
             else if (personalityType.Name == "DISC")
             {
                 if (testSubmissionDto.Answers.Count != TestResource.DISCQuestionCount)
@@ -111,7 +119,29 @@ namespace WebApi.Services
                 userAnswers.Add(answerIndex);
             }
             var result = TestEvaluationExtensions.EvaluateMBTI(userAnswers);
-            var personality = await unitOfWork.PersonalityRepository.GetByNameAsync(result, CancellationToken.None);
+            var personality = await unitOfWork.PersonalityRepository.GetByNameAndTypeNameAsync(result, "MBTI" ,CancellationToken.None);
+            if (personality == null)
+            {
+                throw new InvalidOperationException($"Personality type '{result}' not found in the database.");
+            }
+            return personality.Id;
+        }
+
+        private async Task<Guid> CalculateOCEANResult(TestDto test, List<Guid> answers)
+        {
+            var userAnswers = new List<int>(answers.Count);
+            for (int i = 0; i < test.Questions.Count; i++)
+            {
+                var question = test.Questions[i];
+                var answerIndex = question.Answers.FindIndex(a => a.Id == answers[i]);
+                if (answerIndex < 0 || answerIndex >= question.Answers.Count)
+                {
+                    throw new ArgumentException($"Invalid answer for question {i + 1}.");
+                }
+                userAnswers.Add(answerIndex);
+            }
+            var result = TestEvaluationExtensions.EvaluateOceanTest(userAnswers);
+            var personality = await unitOfWork.PersonalityRepository.GetByNameAndTypeNameAsync(result, "OCEAN", CancellationToken.None);
             if (personality == null)
             {
                 throw new InvalidOperationException($"Personality type '{result}' not found in the database.");
