@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using AppCore.Extensions;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 

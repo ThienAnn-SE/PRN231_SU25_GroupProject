@@ -481,7 +481,6 @@ namespace AppCore.Migrations
                 table: "Users",
                 column: "Username",
                 unique: true);
-            migrationBuilder.SeedData();
         }
 
         /// <inheritdoc />

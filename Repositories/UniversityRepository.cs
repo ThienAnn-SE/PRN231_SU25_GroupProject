@@ -22,12 +22,22 @@ namespace Repositories
     public class UniversityRepository : IUniversityRepository
     {
         private readonly CrudRepository<University> _universityRepository;
+        private class UniversityWithIncludesRepository : CrudRepository<University>
+        {
+            public UniversityWithIncludesRepository(DbContext dbContext, IDbTransaction transaction)
+                : base(dbContext, transaction) { }
+            protected override IQueryable<University> IncludeProperties(DbSet<University> dbSet)
+            {
+                return dbSet
+                    .Include(u => u.Majors); // Assuming you want to include Majors in the query
+            }
+        }
 
         public UniversityRepository(
             DbContext dbContext,
             IDbTransaction transaction)
         {
-            _universityRepository = new CrudRepository<University>(dbContext, transaction);
+            _universityRepository = new UniversityWithIncludesRepository(dbContext, transaction);
         }
 
         public async Task<bool> CreateAsync(CreateUpdateUniversityDto universityDto, Guid? creatorId = null, CancellationToken cancellationToken = default)
@@ -88,7 +98,13 @@ namespace Repositories
                 Email = university.Email,
                 Website = university.Website,
                 Description = university.Description,
-                CreatedAt = university.CreatedAt
+                CreatedAt = university.CreatedAt,
+                Majors = university.Majors.Select(m => new MajorDto
+                {
+                    Id = m.Id,
+                    Name = m.Name,
+                    Description = m.Description
+                }).ToList()
             }).ToList();
         }
 
@@ -113,7 +129,13 @@ namespace Repositories
                 Email = existingUniversity.Email,
                 Website = existingUniversity.Website,
                 Description = existingUniversity.Description,
-                CreatedAt = existingUniversity.CreatedAt
+                CreatedAt = existingUniversity.CreatedAt,
+                Majors = existingUniversity.Majors.Select(m => new MajorDto
+                {
+                    Id = m.Id,
+                    Name = m.Name,
+                    Description = m.Description
+                }).ToList()
             };
         }
 
