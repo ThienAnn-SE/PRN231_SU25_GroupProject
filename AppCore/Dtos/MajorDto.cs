@@ -18,4 +18,10 @@ namespace AppCore.Dtos
         public string RequiredSkills { get; set; } = string.Empty;
         public Guid UniversityId { get; set; }
     }
+
+    public class  MajorPersonalityDto
+    {
+        public Guid MajorId { get; set; }
+        public List<Guid> PersonalityIds { get; set; } = new List<Guid>();
+    }
 }
