@@ -1,0 +1,14 @@
+﻿@page
+@model RazorFrontend.Pages.Tests.ResultModel
+@{
+    ViewData["Title"] = "MBTI Result";
+}
+
+<div class="container mt-5">
+    <div class="text-center">
+        <h2 class="display-4 text-success">🎯 Your MBTI Result</h2>
+        <p class="lead text-muted">Based on your answers, your MBTI personality type is:</p>
+        <h1 class="display-1 fw-bold text-primary">@Model.Result</h1>
+        <a class="btn btn-outline-primary mt-4" asp-page="/Index">Back to Home</a>
+    </div>
+</div>

@@ -20,10 +20,10 @@
         <table class="table table-striped">
             <thead class="table-light">
                 <tr>
-                    <th>Name</th>
-                    <th>Email</th>
+                    <th>Full Name</th>
                     <th>Gender</th>
                     <th>Date of Birth</th>
+                    <th>Address</th>
                     <th></th>
                 </tr>
             </thead>
@@ -32,9 +32,9 @@
                 {
                     <tr>
                         <td>@profile.FullName</td>
-                        <td><i>Linked User</i></td> <!-- Chưa có email trong DTO -->
                         <td>@profile.Gender</td>
-                        <td>@profile.DayOfBirth.ToShortDateString()</td>
+                        <td>@profile.DayOfBirth.ToString("dd/MM/yyyy")</td>
+                        <td>@profile.Address</td>
                         <td class="text-end">
                             <a class="btn btn-sm btn-primary" asp-page="Edit" asp-route-id="@profile.Id">Edit</a>
                         </td>
