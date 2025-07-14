@@ -1,0 +1,57 @@
+﻿@page
+@using AppCore.Enums
+@model RazorFrontend.Pages.UserProfiles.CreateModel
+@{
+    ViewData["Title"] = "Create User Profile";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <h2 class="mb-4 text-center">➕ Create New User Profile</h2>
+
+            @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+            {
+                <div class="alert alert-danger">@Model.ErrorMessage</div>
+            }
+
+            <form method="post">
+                <div class="mb-3">
+                    <label asp-for="Input.FirstName" class="form-label">First Name</label>
+                    <input asp-for="Input.FirstName" class="form-control" />
+                    <span asp-validation-for="Input.FirstName" class="text-danger small"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="Input.LastName" class="form-label">Last Name</label>
+                    <input asp-for="Input.LastName" class="form-control" />
+                    <span asp-validation-for="Input.LastName" class="text-danger small"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="Input.DayOfBirth" class="form-label">Date of Birth</label>
+                    <input asp-for="Input.DayOfBirth" type="date" class="form-control" />
+                    <span asp-validation-for="Input.DayOfBirth" class="text-danger small"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="Input.Gender" class="form-label">Gender</label>
+                    <select asp-for="Input.Gender" class="form-select"
+                            asp-items="Html.GetEnumSelectList<AppCore.Enums.Gender>()"></select>
+                    <span asp-validation-for="Input.Gender" class="text-danger small"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="Input.Address" class="form-label">Address</label>
+                    <input asp-for="Input.Address" class="form-control" />
+                    <span asp-validation-for="Input.Address" class="text-danger small"></span>
+                </div>
+
+                <div class="text-end mt-4">
+                    <button type="submit" class="btn btn-success">Save</button>
+                    <a asp-page="Index" class="btn btn-secondary ms-2">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
