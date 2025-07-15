@@ -8,4 +8,10 @@ namespace AppCore.Dtos
         public Guid TestId { get; set; }
         public List<AnswerDto> Answers { get; set; } = new List<AnswerDto>();
     }
+
+    public class CreateQuestionDto
+    {
+        public string Text { get; set; } = string.Empty;
+        public List<CreateAnswerDto> Answers { get; set; } = new List<CreateAnswerDto>();
+    }
 }

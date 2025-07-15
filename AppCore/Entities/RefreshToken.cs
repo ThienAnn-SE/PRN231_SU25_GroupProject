@@ -91,7 +91,7 @@ namespace AppCore.Entities
     {
         public void Configure(EntityTypeBuilder<RefreshToken> builder)
         {
-            builder.Property(x => x.Token).IsRequired(true).HasMaxLength(128);
+            builder.Property(x => x.Token).IsRequired(true).HasMaxLength(512);
             builder.Property(x => x.ExpiryDate).IsRequired(true);
             builder.Property(x => x.IsRevoked).IsRequired(true).HasDefaultValue(false);
             builder.Property(x => x.RevokedReason).IsRequired(false);

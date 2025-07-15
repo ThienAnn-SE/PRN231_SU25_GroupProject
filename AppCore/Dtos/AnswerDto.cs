@@ -7,4 +7,9 @@ namespace AppCore.Dtos
         public string Text { get; set; } = string.Empty;
         public Guid QuestionId { get; set; }
     }
+
+    public class CreateAnswerDto
+    {
+        public string Text { get; set; } = string.Empty;
+    }
 }

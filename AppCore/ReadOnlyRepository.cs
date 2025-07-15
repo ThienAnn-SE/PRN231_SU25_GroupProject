@@ -136,6 +136,11 @@ namespace AppCore
             return await query.FirstOrDefaultAsync(cancellationToken);
         }
 
+        protected virtual IQueryable<TEntity> IncludeProperties(DbSet<TEntity> dbSet)
+        {
+            return dbSet;
+        }
+
         public async Task<List<TEntity>> FindAsync(
             Expression<Func<TEntity, bool>>[]? filters,
             string? orderBy = null,
@@ -150,7 +155,6 @@ namespace AppCore
 
             if (limit > 0)
                 query = query.Take(limit);
-
             return await query.ToListAsync(cancellationToken);
         }
 
@@ -191,8 +195,7 @@ namespace AppCore
         protected IQueryable<TEntity> BuildQuery(Expression<Func<TEntity, bool>>[]? filters, string? orderBy)
         {
             // Start with a query that excludes deleted items
-            var query = _dbSet.Where(x => !x.DeletedAt.HasValue);
-
+            var query = IncludeProperties(_dbSet).Where(x => !x.DeletedAt.HasValue);
             // Apply additional filters if provided
             if (filters != null && filters.Length > 0)
             {

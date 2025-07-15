@@ -22,12 +22,22 @@ namespace Repositories
     public class UniversityRepository : IUniversityRepository
     {
         private readonly CrudRepository<University> _universityRepository;
+        private class UniversityWithIncludesRepository : CrudRepository<University>
+        {
+            public UniversityWithIncludesRepository(DbContext dbContext, IDbTransaction transaction)
+                : base(dbContext, transaction) { }
+            protected override IQueryable<University> IncludeProperties(DbSet<University> dbSet)
+            {
+                return dbSet
+                    .Include(u => u.Majors); // Assuming you want to include Majors in the query
+            }
+        }
 
         public UniversityRepository(
             DbContext dbContext,
             IDbTransaction transaction)
         {
-            _universityRepository = new CrudRepository<University>(dbContext, transaction);
+            _universityRepository = new UniversityWithIncludesRepository(dbContext, transaction);
         }
 
         public async Task<bool> CreateAsync(CreateUpdateUniversityDto universityDto, Guid? creatorId = null, CancellationToken cancellationToken = default)
@@ -72,10 +82,14 @@ namespace Repositories
             return _universityRepository.HardDeleteAsync(id, cancellationToken);
         }
 
-        public Task<List<UniversityDto>> GetAll(CancellationToken cancellationToken = default)
+        public async Task<List<UniversityDto>> GetAll(CancellationToken cancellationToken = default)
         {
-            var universities = _universityRepository.GetAllAsync(cancellationToken: cancellationToken);
-            return universities.ContinueWith(t => t.Result.Select(university => new UniversityDto
+            var universities = await _universityRepository.GetAllAsync(cancellationToken: cancellationToken);
+            if (universities == null || !universities.Any())
+            {
+                return new List<UniversityDto>();
+            }
+            return universities.Select(university => new UniversityDto
             {
                 Id = university.Id,
                 Name = university.Name,
@@ -84,8 +98,14 @@ namespace Repositories
                 Email = university.Email,
                 Website = university.Website,
                 Description = university.Description,
-                CreatedAt = university.CreatedAt
-            }).ToList(), cancellationToken);
+                CreatedAt = university.CreatedAt,
+                Majors = university.Majors.Select(m => new MajorDto
+                {
+                    Id = m.Id,
+                    Name = m.Name,
+                    Description = m.Description
+                }).ToList()
+            }).ToList();
         }
 
         public async Task<UniversityDto?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
@@ -97,10 +117,10 @@ namespace Repositories
             var existingUniversity = await _universityRepository.FindOneAsync(filter, cancellationToken: cancellationToken);
             if (existingUniversity == null)
             {
-                return await Task.FromResult<UniversityDto?>(null);
+                return null;
             }
 
-            return await Task.FromResult(new UniversityDto
+            return new UniversityDto
             {
                 Id = existingUniversity.Id,
                 Name = existingUniversity.Name,
@@ -109,17 +129,22 @@ namespace Repositories
                 Email = existingUniversity.Email,
                 Website = existingUniversity.Website,
                 Description = existingUniversity.Description,
-                CreatedAt = existingUniversity.CreatedAt
-            });
+                CreatedAt = existingUniversity.CreatedAt,
+                Majors = existingUniversity.Majors.Select(m => new MajorDto
+                {
+                    Id = m.Id,
+                    Name = m.Name,
+                    Description = m.Description
+                }).ToList()
+            };
         }
 
         public async Task<bool> UpdateAsync(Guid id, CreateUpdateUniversityDto dto, Guid? updaterId = null, CancellationToken cancellationToken = default)
         {
             var existingUniversity = await _universityRepository.FindOneAsync(
-                new Expression<Func<University, bool>>[]
-                {
-            x => x.Id == id
-                },
+                [
+                    x => x.Id == id
+                ],
                 cancellationToken: cancellationToken
             );
 
@@ -127,12 +152,12 @@ namespace Repositories
                 return false;
 
             var duplicateNameUniversity = await _universityRepository.FindOneAsync(
-                new Expression<Func<University, bool>>[]
-                {
+                [
                     x => x.Name == dto.Name && x.Id != id
-                },
+                ],
                 cancellationToken: cancellationToken
             );
+
             if (duplicateNameUniversity != null)
                 return false;
 
