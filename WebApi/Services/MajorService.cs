@@ -60,7 +60,11 @@ namespace WebApi.Services
             {
                 return ApiResponse.CreateNotFoundResponse("University not found for the given ID.");
             }
-            
+            var majors = university.Majors;
+            if (majors.Count > 0 && majors.Select(x => x.Name.Trim().ToLower()).ToList().Contains(majorDto.Name.Trim().ToLower()))
+            {
+                return ApiResponse.CreateBadRequestResponse("Existing Majors");
+            }
             var success = await _unitOfWork.MajorRepository.CreateAsync(majorDto, creatorId, cancellationToken);
             if (!success)
             {
