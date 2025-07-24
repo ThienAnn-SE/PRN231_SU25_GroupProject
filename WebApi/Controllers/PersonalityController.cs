@@ -1,10 +1,12 @@
 ﻿using AppCore.BaseModel;
 using AppCore.Dtos;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WebApi.Services;
 
 namespace WebApi.Controllers
 {
+    [AllowAnonymous]
     [Route("api/[controller]")]
     [ApiController]
     public class PersonalityController : ControllerBase
@@ -18,68 +20,68 @@ namespace WebApi.Controllers
 
         // Placeholder for future personality-related endpoints
         // This controller can be expanded with methods to handle personality-related operations
-        [HttpGet("test")]
+        [HttpGet("Test")]
         public IActionResult TestEndpoint()
         {
             return Ok("PersonalityController is working!");
         }
 
         [HttpGet("{id}")]
-        public async Task<ApiResponse> GetPersonalityById(Guid id)
+        public async Task<IActionResult> GetPersonalityById(Guid id)
         {
             if (id == Guid.Empty)
             {
-                return ApiResponse<PersonalityDto>.CreateResponse(System.Net.HttpStatusCode.BadRequest, false, "Personality ID is required.");
+                return BadRequest(ApiResponse<PersonalityDto>.CreateResponse(System.Net.HttpStatusCode.BadRequest, false, "Personality ID is required."));
             }
             var response = await _personalityService.GetById(id);
             if (response == null)
             {
-                return ApiResponse.CreateNotFoundResponse("Personality not found.");
+                return NotFound(ApiResponse.CreateNotFoundResponse("Personality not found."));
             }
-            return response;
+            return Ok(response);
         }
 
-        [HttpGet("type/{id}")]
-        public async Task<ApiResponse> GetPersonalityTypeById(Guid id)
+        [HttpGet("Type/{id}")]
+        public async Task<IActionResult> GetPersonalityTypeById(Guid id)
         {
             if (id == Guid.Empty)
             {
-                return ApiResponse<PersonalityTypeDto>.CreateResponse(System.Net.HttpStatusCode.BadRequest, false, "Personality type ID is required.");
+                return BadRequest(ApiResponse<PersonalityTypeDto>.CreateResponse(System.Net.HttpStatusCode.BadRequest, false, "Personality type ID is required."));
             }
             var response = await _personalityService.GetTypeById(id);
             if (response == null)
             {
-                return ApiResponse.CreateNotFoundResponse("Personality type not found.");
+                return NotFound(ApiResponse.CreateNotFoundResponse("Personality type not found."));
             }
-            return response;
+            return Ok(response);
         }
 
         [HttpGet]
-        public async Task<ApiResponses<PersonalityDetailDto>> GetAllPersonalities(CancellationToken cancellationToken = default)
+        public async Task<IActionResult> GetAllPersonalities(CancellationToken cancellationToken = default)
         {
             var response = await _personalityService.GetAll(cancellationToken);
             if (response == null || response.Data?.Count == 0)
             {
-                return ApiResponses<PersonalityDetailDto>.CreateNotFoundResponse(
+                return NotFound(ApiResponses<PersonalityDetailDto>.CreateNotFoundResponse(
                     default,
                     "No personalities found."
-                );
+                ));
             }
-            return response;
+            return Ok(response);
         }
 
-        [HttpGet("types")]
-        public async Task<ApiResponses<PersonalityTypeDto>> GetAllPersonalityTypes(CancellationToken cancellationToken = default)
+        [HttpGet("Type")]
+        public async Task<IActionResult> GetAllPersonalityTypes(CancellationToken cancellationToken = default)
         {
             var response = await _personalityService.GetTypeAll(cancellationToken);
             if (response == null || response.Data?.Count == 0)
             {
-                return ApiResponses<PersonalityTypeDto>.CreateNotFoundResponse(
+                return NotFound( ApiResponses<PersonalityTypeDto>.CreateNotFoundResponse(
                     default,
                     "No personality types found."
-                );
+                ));
             }
-            return response;
+            return Ok(response);
         }
     }
 }

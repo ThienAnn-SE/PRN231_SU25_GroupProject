@@ -1,10 +1,13 @@
 ﻿using AppCore.BaseModel;
 using AppCore.Dtos;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using WebApi.Extension;
 using WebApi.Services;
 
 namespace WebApi.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class UniversityController : Controller
@@ -16,56 +19,64 @@ namespace WebApi.Controllers
             _universityService = universityService;
         }
 
+        [AllowAnonymous]
         [HttpGet]
-        public async Task<ApiResponse> GetAllUniversities(CancellationToken cancellationToken)
+        public async Task<IActionResult> GetAllUniversities(CancellationToken cancellationToken)
         {
             var universities = await _universityService.GetAllUniversitiesAsync(cancellationToken);
             if (universities == null)
             {
-                return ApiResponse.CreateNotFoundResponse("No universities found.");
+                return NotFound(ApiResponse.CreateNotFoundResponse("No universities found."));
             }
-            return universities;
+            return Ok(universities);
         }
 
+        [AllowAnonymous]
         [HttpGet("{id}")]
-        public async Task<ApiResponse> GetUniversityById(Guid id, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetUniversityById(Guid id, CancellationToken cancellationToken)
         {
             var university = await _universityService.GetUniversityByIdAsync(id, cancellationToken);
             if (university == null)
             {
-                return ApiResponse.CreateNotFoundResponse("No university existed with given ID"); 
+                return NotFound(ApiResponse.CreateNotFoundResponse("No university existed with given ID")); 
             }
-            return university;
+            return Ok(university);
         }
 
+        [Authorize(Roles = Role.AdminAndManager)]
         [HttpPost]
-        public async Task<ApiResponse> CreateUniversity([FromBody] CreateUpdateUniversityDto universityDto, CancellationToken cancellationToken)
+        public async Task<IActionResult> CreateUniversity([FromBody] CreateUpdateUniversityDto universityDto, CancellationToken cancellationToken)
         {
             if (universityDto == null)
             {
-                return ApiResponse.CreateBadRequestResponse("University data is required.");
+                return BadRequest(ApiResponse.CreateBadRequestResponse("University data is required."));
             }
             var result = await _universityService.CreateUniversityAsync(universityDto);
-            return result;
+            if (result.Status == System.Net.HttpStatusCode.BadRequest)
+            {
+                return BadRequest(result);
+            }
+            return CreatedAtAction("Created", result);
         }
 
+        [Authorize(Roles = Role.AdminAndManager)]
         [HttpPut("{id}")]
-        public async Task<ApiResponse> Update(Guid id, [FromBody] CreateUpdateUniversityDto dto)
+        public async Task<IActionResult> Update(Guid id, [FromBody] CreateUpdateUniversityDto dto)
         {
             if (dto == null)
             {
-                return ApiResponse.CreateBadRequestResponse("University data is required.");
+                return BadRequest(ApiResponse.CreateBadRequestResponse("University data is required."));
             }
             if (id == Guid.Empty)
             {
-                return ApiResponse.CreateBadRequestResponse("University ID is required.");
+                return BadRequest(ApiResponse.CreateBadRequestResponse("University ID is required."));
             }
             var result = await _universityService.UpdateUniversityAsync(id, dto);
             if (result == null)
             {
-                return ApiResponse.CreateNotFoundResponse("University does not exist with given ID.");
+                return NotFound(ApiResponse.CreateNotFoundResponse("University does not exist with given ID."));
             }
-            return result;
+            return Ok(result);
         }
 
         //[HttpDelete("{id}")]

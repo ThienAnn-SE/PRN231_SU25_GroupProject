@@ -8,6 +8,15 @@ using System.Text;
 
 namespace WebApi.Extension
 {
+    public class Role
+    {
+        public const string Admin = "Admin";
+        public const string User = "User";
+        public const string Manager = "Manager";
+        public const string ManagerAndUser = "Manager, User";
+        public const string AdminAndManager = "Adnmin, Manager";
+    }
+
     public class AppClaimTypes
     {
         public const string Id = "id";

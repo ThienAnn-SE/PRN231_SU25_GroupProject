@@ -1,0 +1,28 @@
+{
+  "Routes": [
+    {
+      "DownstreamPathTemplate": "/api/TestSubmission",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5070
+        }
+      ],
+      "UpstreamPathTemplate": "/gateway/test-submission",
+      "UpstreamHttpMethod": [ "GET", "POST" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/TestSubmission/{id}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5070
+        }
+      ],
+      "UpstreamPathTemplate": "/gateway/test-submission/{id}",
+      "UpstreamHttpMethod": [ "GET" ]
+    }
+  ]
+}

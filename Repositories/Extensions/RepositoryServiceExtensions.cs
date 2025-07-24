@@ -1,4 +1,5 @@
-using AppCore.Extensions;
+using AppCore;
+using AppCore.Data;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Repositories.Extensions
@@ -11,9 +12,10 @@ namespace Repositories.Extensions
         /// <summary>
         /// Adds the repository layer services to the dependency injection container
         /// </summary>
-        public static IServiceCollection AddRepositories(this IServiceCollection services, string connectionString)
+        public static IServiceCollection AddRepositories(this IServiceCollection services)
         {
-            services.AddAppDbContext(connectionString);
+            services.AddScoped<ApplicationDbContext>();
+            services.AddScoped<IDbTransaction, DbTransaction>();
             services.AddTransient<IUnitOfWork, UnitOfWork>();
             //services.AddScoped<IUnitOfWork, UnitOfWork>();
             return services;
