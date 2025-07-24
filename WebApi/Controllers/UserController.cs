@@ -19,6 +19,14 @@ namespace WebApi.Controllers
             _userService = userService ?? throw new ArgumentNullException(nameof(userService));
         }
 
+        [HttpGet("Init")]
+        public async Task<IActionResult> InitTestUsers()
+        {
+            await _userService.InitTestUsers(); ;
+            return Ok();
+        }
+
+        [Authorize]
         [HttpGet("{id}")]
         public async Task<ApiResponse> GetById(Guid id)
         {
@@ -35,7 +43,7 @@ namespace WebApi.Controllers
         {
             if (loginDto == null)
             {
-                ApiResponse.CreateBadRequestResponse("Login data is required.");
+                return ApiResponse.CreateBadRequestResponse("Login data is required.");
             }
             var response = await _userService.Login(loginDto, jwtOptions.Value);
             return response;

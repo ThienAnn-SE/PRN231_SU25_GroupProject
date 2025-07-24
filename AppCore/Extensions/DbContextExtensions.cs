@@ -9,26 +9,7 @@ namespace AppCore.Extensions
     /// Extension methods for setting up database context
     /// </summary>
     public static class DbContextExtensions
-    {
-        /// <summary>
-        /// Adds the ApplicationDbContext to the specified IServiceCollection
-        /// </summary>
-        public static IServiceCollection AddAppDbContext(
-            this IServiceCollection services,
-            string connectionString)
-        {
-            services.AddDbContext<ApplicationDbContext>(options =>
-            {
-                options.UseSqlServer(connectionString);
-                options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
-                options.EnableDetailedErrors();
-            });
-            
-            // Register DbTransaction
-            services.AddTransient<IDbTransaction, DbTransaction>();
-            return services;
-        }
-        
+    {   
         /// <summary>
         /// Ensures that the database is created and migrated to the latest version
         /// </summary>

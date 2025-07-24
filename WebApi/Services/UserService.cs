@@ -10,6 +10,7 @@ namespace WebApi.Services
         Task<ApiResponse<UserDto>> GetById (Guid id);
         Task<ApiResponse> Login(LoginDto loginDto, JwtOptions jwtOptions);
         Task<ApiResponse> Register(RegisterDto registerDto);
+        Task<ApiResponse> InitTestUsers();
     }
 
     public class UserService : BaseService, IUserService
@@ -45,7 +46,8 @@ namespace WebApi.Services
                 UserId = user.Id,
                 CreatedByIp = string.Empty
             };
-            if (! await unitOfWork.RefreshTokens.CreateAsync(refreshToken, user.Id, CancellationToken.None))
+            var isSuccess = await unitOfWork.RefreshTokens.CreateAsync(refreshToken, user.Id, CancellationToken.None);
+            if (!isSuccess)
             {
                 return ApiResponse.CreateInternalServerErrorResponse(
                     "Failed to create refresh token."
@@ -77,6 +79,16 @@ namespace WebApi.Services
                 return ApiResponse<UserDto>.CreateNotFoundResponse(default, "User not found.");
             }
             return ApiResponse<UserDto>.CreateResponse(System.Net.HttpStatusCode.OK, true, "User retrieved successfully.", user);
+        }
+
+        public async Task<ApiResponse> InitTestUsers()
+        {
+            var result = await unitOfWork.UserAuth.InitTestUser();
+            if (!result)
+            {
+                return ApiResponse.CreateBadRequestResponse("Failt");
+            }
+            return ApiResponse.CreateSuccessResponse();
         }
     }
 }

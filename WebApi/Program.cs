@@ -47,7 +47,7 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 // Register repositories and unit of work
-builder.Services.AddRepositories(builder.Configuration.GetConnectionString("DefaultConnection"));
+builder.Services.AddRepositories();
 builder.Services.AddServices();
 builder.Services.AddAuthentication("Bearer")
     .AddJwtBearer("Bearer", options =>
@@ -92,14 +92,13 @@ app.UseResponseCompression();
 // Standard middleware
 app.UseHttpsRedirection();
 app.UseCors();
-
+// Your custom middleware
+app.UseMiddleware<FingerprintMiddleware>();
+app.UseMiddleware<AuthMiddleware>();
 // Authentication comes before Authorization
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Your custom middleware
-app.UseMiddleware<FingerprintMiddleware>();
-app.UseMiddleware<AuthMiddleware>();
 // Finally, endpoints
 app.MapControllers();
 app.Run();

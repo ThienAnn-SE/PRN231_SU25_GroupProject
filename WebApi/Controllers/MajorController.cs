@@ -1,12 +1,14 @@
 ﻿using AppCore.BaseModel;
 using AppCore.Dtos;
-using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
+using WebApi.Extension;
 using WebApi.Services;
 
 namespace WebApi.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class MajorController : Controller
@@ -18,6 +20,7 @@ namespace WebApi.Controllers
             _majorService = majorService;
         }
 
+        [AllowAnonymous]
         [HttpGet]
         public async Task<IActionResult> GetAllMajors()
         {
@@ -29,6 +32,7 @@ namespace WebApi.Controllers
             return Ok(majors);
         }
 
+        [AllowAnonymous]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetMajorById(Guid id)
         {
@@ -44,6 +48,18 @@ namespace WebApi.Controllers
             return Ok(major);
         }
 
+        [HttpGet("Personality/{id}")]
+        public async Task<IActionResult> GetMajorPersonalities(Guid id)
+        {
+            if (id == Guid.Empty)
+            {
+                return BadRequest(ApiResponse.CreateBadRequestResponse("Major ID is required."));
+            }
+            var personalities = await _majorService.GetMajorsByPersonalityIdAsync(id);
+            return Ok(personalities);
+        }
+
+        [Authorize(Roles = Role.Admin)]
         [HttpPost]
         public async Task<IActionResult> CreateMajor([FromBody] CreateUpdateMajorDto majorDto)
         {
@@ -60,21 +76,10 @@ namespace WebApi.Controllers
             {
                 return NotFound(response);
             }
-            return Ok();
+            return CreatedAtAction("Created", response);
         }
 
-        [HttpGet("Personality/{id}")]
-        public async Task<IActionResult> GetMajorPersonalities(Guid id)
-        {
-            if (id == Guid.Empty)
-            {
-                return BadRequest(ApiResponse.CreateBadRequestResponse("Major ID is required."));
-            }
-            var personalities = await _majorService.GetMajorsByPersonalityIdAsync(id);
-            return Ok(personalities);
-        }
-
-
+        [Authorize(Roles = Role.Admin)]
         [HttpPost("Personality")]
         public async Task<IActionResult> AddPersonalityToMajor([FromBody] MajorPersonalityDto majorPersonalityDto)
         {
@@ -94,6 +99,7 @@ namespace WebApi.Controllers
             return Ok(response);
         }
 
+        [Authorize(Roles = Role.Admin)]
         [HttpDelete("Personality")]
         public async Task<IActionResult> DeletePersonalityFromMajor([FromBody] MajorPersonalityDto majorPersonalityDto)
         {
