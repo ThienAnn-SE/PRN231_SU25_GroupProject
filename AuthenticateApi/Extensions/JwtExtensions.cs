@@ -13,7 +13,7 @@ namespace WebApi.Extension
         public const string User = "User";
         public const string Manager = "Manager";
         public const string ManagerAndUser = "Manager, User";
-        public const string AdminAndManager = "Admin, Manager";
+        public const string AdminAndManager = "Adnmin, Manager";
     }
 
     public class AppClaimTypes

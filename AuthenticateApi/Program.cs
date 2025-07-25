@@ -1,19 +1,17 @@
+using Repositories.Extensions;
 using AppCore.BaseModel;
-using AppCore.Extensions;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using Repositories.Extensions;
 using System.Text;
-using WebApi.Extension;
+using WebApi.Services;
 using WebApi.Middlewares;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.Configure<AuthApiSettings>(
-    builder.Configuration.GetSection("AuthApi"));
-
 builder.Services.AddSwaggerGen(options =>
 {
     options.SwaggerDoc("v1", new OpenApiInfo
@@ -49,9 +47,8 @@ builder.Services.AddSwaggerGen(options =>
         }
     });
 });
-// Register repositories and unit of work
 builder.Services.AddRepositories();
-builder.Services.AddServices();
+builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddAuthentication("Bearer")
     .AddJwtBearer("Bearer", options =>
     {
@@ -70,12 +67,13 @@ builder.Services.AddAuthentication("Bearer")
             ClockSkew = TimeSpan.Zero
         };
     });
-builder.Services.AddHttpClient(); // If using named client, configure here
 builder.Services.AddAuthorization();
 // Add services
 builder.Services.AddMemoryCache();
+builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("Jwt"));
 builder.Services.AddResponseCompression();
 builder.Services.AddCors();
+builder.Services.AddHttpContextAccessor();
 
 var app = builder.Build();
 
@@ -85,8 +83,6 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-app.MigrateDatabase();
-
 // Add early in the pipeline for cross-cutting concerns
 app.UseMiddleware<GlobalExceptionMiddleware>();
 app.UseResponseCompression();

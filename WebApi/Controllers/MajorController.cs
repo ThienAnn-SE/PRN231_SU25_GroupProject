@@ -1,6 +1,7 @@
 ﻿using AppCore.BaseModel;
 using AppCore.Dtos;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 using WebApi.Extension;
@@ -76,7 +77,7 @@ namespace WebApi.Controllers
             {
                 return NotFound(response);
             }
-            return CreatedAtAction("Created", response);
+            return Ok(response);
         }
 
         [Authorize(Roles = Role.Admin)]
