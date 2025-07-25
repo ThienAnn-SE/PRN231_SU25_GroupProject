@@ -2,6 +2,15 @@
 
 namespace WebApi.Extension
 {
+    public class Role
+    {
+        public const string Admin = "Admin";
+        public const string User = "User";
+        public const string Manager = "Manager";
+        public const string ManagerAndUser = "Manager, User";
+        public const string AdminAndManager = "Admin, Manager";
+    }
+
     public static class StringExtensions
     {
         /// <summary>

@@ -92,4 +92,10 @@ namespace WebApi.Middlewares
         public string ValidateTokenUrl { get; set; }
     }
 
+    public class AppClaimTypes
+    {
+        public const string Id = "id";
+        public const string Role = "role";
+    }
+
 }
