@@ -59,5 +59,20 @@ namespace WebApi.Controllers
             var response = await _userService.Register(registerDto);
             return response;
         }
+
+        [HttpGet("Validate-token")]
+        public async Task<IActionResult> ValidateToken([FromServices] IOptions<JwtOptions> jwtOptions)
+        {
+            var response = await _userService.ValidateToken(jwtOptions.Value);
+            if (response.Status == System.Net.HttpStatusCode.Unauthorized)
+            {
+                return Unauthorized(response);
+            }
+            else if (response.Status == System.Net.HttpStatusCode.NotFound)
+            {
+                return NotFound(response);
+            }
+            return Ok(response);
+        }
     }
 }

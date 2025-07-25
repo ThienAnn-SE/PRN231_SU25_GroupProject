@@ -1,6 +1,9 @@
 ﻿using AppCore.BaseModel;
 using AppCore.Dtos;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Repositories;
+using System.Security.Claims;
 using WebApi.Extension;
 
 namespace WebApi.Services
@@ -11,19 +14,22 @@ namespace WebApi.Services
         Task<ApiResponse> Login(LoginDto loginDto, JwtOptions jwtOptions);
         Task<ApiResponse> Register(RegisterDto registerDto);
         Task<ApiResponse> InitTestUsers();
+        Task<ApiResponse> ValidateToken(JwtOptions jwtOptions);
     }
 
     public class UserService : BaseService, IUserService
     {
-        public UserService(IUnitOfWork unitOfWork) : base(unitOfWork)
-        {
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
+        public UserService(IUnitOfWork unitOfWork, IHttpContextAccessor httpContextAccessor) : base(unitOfWork)
+        {
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public async Task<ApiResponse> Login(LoginDto loginDto, JwtOptions jwtOptions)
         {
-            var isExist = await unitOfWork.UserAuth.IsUserExistsAsync(loginDto.UserName);
-            if (!isExist)
+            var exstingUser = await unitOfWork.UserAuth.GetByEmailAsync(loginDto.Email);
+            if (exstingUser == null)
             {
                 return ApiResponse.CreateNotFoundResponse(
                     "User not found."
@@ -89,6 +95,60 @@ namespace WebApi.Services
                 return ApiResponse.CreateBadRequestResponse("Failt");
             }
             return ApiResponse.CreateSuccessResponse();
+        }
+
+        public async Task<ApiResponse> ValidateToken(JwtOptions jwtOptions)
+        {
+            var accessToken = _httpContextAccessor.HttpContext?.Request.
+                Headers.
+                Authorization.
+                FirstOrDefault()?.Split(" ").
+                Last();
+            if (string.IsNullOrWhiteSpace(accessToken))
+            {
+                return ApiResponse.CreateUnauthorizedResponse("Unauthorized - Empty token");
+            }
+
+            ClaimsPrincipal? principal;
+            try
+            {
+                principal = JwtExtensions.ValidateToken(accessToken, jwtOptions);
+            }
+            catch (SecurityTokenException)
+            {
+                return ApiResponse.CreateUnauthorizedResponse("Unauthorized - Invalid ClaimsPrincipal");
+            }
+
+            var accountIdString = principal.FindFirst(AppClaimTypes.Id)?.Value;
+            if (!Guid.TryParse(accountIdString, out var accountId) || accountId == Guid.Empty)
+            {
+                return ApiResponse.CreateUnauthorizedResponse("Unauthorized - Invalid Account ID");
+            }
+
+            var now = DateTime.UtcNow;
+
+            var user = await unitOfWork.UserAuth.GetByIdAsync(accountId);
+            if (user == null)
+            {
+                return ApiResponse.CreateNotFoundResponse("Unauthorized - Account ID does not exist");
+            }
+
+            var tokens = await unitOfWork.RefreshTokens.GetActiveTokensByUserIdAsync(accountId);
+
+            var token = tokens.FirstOrDefault(t =>
+                t.Token.Equals(accessToken) &&
+                t.UserId == accountId &&
+                t.ExpiryDate > now);
+
+            if (token == null)
+            {
+                return ApiResponse.CreateNotFoundResponse("Unauthorized - Token does not exist");
+            }
+            if (!token.IsActive)
+            {
+                return ApiResponse.CreateNotFoundResponse("Unauthorized - Token does not active");
+            }
+            return ApiResponse<UserDto>.CreateResponse(System.Net.HttpStatusCode.OK, true, "Validate token successfully", user);
         }
     }
 }

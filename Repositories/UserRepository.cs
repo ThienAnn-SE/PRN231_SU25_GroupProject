@@ -13,6 +13,7 @@ namespace Repositories
         Task<bool> RegisterAsync(RegisterDto registerDto);
         Task<bool> IsUserExistsAsync(string username);
         Task<UserDto?> GetByUsernameAsync(string username, CancellationToken cancellationToken = default);
+        Task<UserDto?> GetByEmailAsync(string email, CancellationToken cancellationToken = default);
         Task<UserDto?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
         Task<List<UserDto>> GetAllAsync(CancellationToken cancellationToken = default);
         Task<bool> InitTestUser();
@@ -35,7 +36,7 @@ namespace Repositories
         {
             var filter = new Expression<Func<User, bool>>[]
             {
-                x => x.Username == loginDto.UserName
+                x => x.Email == loginDto.Email
             };
             var entity = await _repository
                 .FindOneAsync(filter, cancellationToken: cancellationToken);
@@ -177,6 +178,30 @@ namespace Repositories
         public Task<List<UserDto>> GetAllAsync(CancellationToken cancellationToken = default)
         {
             throw new NotImplementedException();
+        }
+
+        public async Task<UserDto?> GetByEmailAsync(string email, CancellationToken cancellationToken = default)
+        {
+            var filter = new Expression<Func<User, bool>>[]
+            {
+                x => x.Email.Equals(email)
+            };
+            var entity = await _repository.FindOneAsync(filter, cancellationToken: cancellationToken);
+            if (entity == null)
+            {
+                return null;
+            }
+            return new UserDto()
+            {
+                Id = entity.Id,
+                Username = entity.Username,
+                Email = entity.Email,
+                EmailConfirmed = entity.EmailConfirmed,
+                TwoFactorEnabled = entity.TwoFactorEnabled,
+                LockoutEnd = entity.LockoutEnd,
+                AccessFailedCount = entity.AccessFailedCount,
+                Role = entity.Role
+            };
         }
     }
 }

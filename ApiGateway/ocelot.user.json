@@ -6,7 +6,7 @@
       "DownstreamHostAndPorts": [
         {
           "Host": "localhost",
-          "Port": 5070
+          "Port": 5180
         }
       ],
       "UpstreamPathTemplate": "/gateway/user/login",
@@ -18,7 +18,7 @@
       "DownstreamHostAndPorts": [
         {
           "Host": "localhost",
-          "Port": 5070
+          "Port": 5180
         }
       ],
       "UpstreamPathTemplate": "/gateway/user/register",
@@ -30,7 +30,7 @@
       "DownstreamHostAndPorts": [
         {
           "Host": "localhost",
-          "Port": 5070
+          "Port": 5180
         }
       ],
       "UpstreamPathTemplate": "/gateway/user/{userId}",

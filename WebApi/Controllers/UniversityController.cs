@@ -56,7 +56,7 @@ namespace WebApi.Controllers
             {
                 return BadRequest(result);
             }
-            return CreatedAtAction("Created", result);
+            return Ok(result);
         }
 
         [Authorize(Roles = Role.AdminAndManager)]

@@ -40,7 +40,7 @@ public class LoginModel : PageModel
 
         var loginDto = new LoginDto
         {
-            UserName = Input.UserName,
+            Email = Input.UserName,
             Password = Input.Password
         };
 
