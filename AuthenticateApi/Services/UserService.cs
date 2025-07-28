@@ -15,6 +15,7 @@ namespace WebApi.Services
         Task<ApiResponse> Register(RegisterDto registerDto);
         Task<ApiResponse> InitTestUsers();
         Task<ApiResponse> ValidateToken(JwtOptions jwtOptions);
+        Task<ApiResponse> KeepAlive(JwtOptions jwtOptions);
     }
 
     public class UserService : BaseService, IUserService
@@ -149,6 +150,55 @@ namespace WebApi.Services
                 return ApiResponse.CreateNotFoundResponse("Unauthorized - Token does not active");
             }
             return ApiResponse<UserDto>.CreateResponse(System.Net.HttpStatusCode.OK, true, "Validate token successfully", user);
+        }
+
+        public async Task<ApiResponse> KeepAlive(JwtOptions jwtOptions)
+        {
+            var accessToken = _httpContextAccessor.HttpContext?.Request.
+                Headers.
+                Authorization.
+                FirstOrDefault()?.Split(" ").
+                Last();
+            if (string.IsNullOrWhiteSpace(accessToken))
+            {
+                return ApiResponse.CreateUnauthorizedResponse("Unauthorized - Empty token");
+            }
+
+            ClaimsPrincipal? principal;
+            try
+            {
+                principal = JwtExtensions.ValidateToken(accessToken, jwtOptions);
+            }
+            catch (SecurityTokenException)
+            {
+                return ApiResponse.CreateUnauthorizedResponse("Unauthorized - Invalid ClaimsPrincipal");
+            }
+
+            var accountIdString = principal.FindFirst(AppClaimTypes.Id)?.Value;
+            if (!Guid.TryParse(accountIdString, out var accountId) || accountId == Guid.Empty)
+            {
+                return ApiResponse.CreateUnauthorizedResponse("Unauthorized - Invalid Account ID");
+            }
+            var user = await unitOfWork.UserAuth.GetByIdAsync(accountId);
+            if (user == null)
+            {
+                return ApiResponse.CreateNotFoundResponse("Unauthorized - Account ID does not exist");
+            }
+            var tokens = await unitOfWork.RefreshTokens.GetActiveTokensByUserIdAsync(accountId);
+            if (tokens.Count == 0)
+            {
+                return ApiResponse.CreateNotFoundResponse("Does not found any ative token, please login again!");
+            }
+            foreach (var token in tokens)
+            {
+                var newToken = JwtExtensions.GenerateAccessToken(user, jwtOptions);
+                var result = await unitOfWork.RefreshTokens.RotateTokenAsync(token.Id, newToken, string.Empty);
+                if (result == null)
+                {
+                    return ApiResponse.CreateNotFoundResponse($"Not found token with id {token.Id}");
+                }
+            }
+            return ApiResponse.CreateSuccessResponse("Rotate token successfully!");
         }
     }
 }

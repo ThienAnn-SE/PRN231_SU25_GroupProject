@@ -172,9 +172,7 @@ namespace Repositories
                 return null;
             
             var newRefreshToken = entity.RotateToken(newToken, ipAddress);
-            await _repository.UpdateAsync(entity, editorId, cancellationToken);
-            await _repository.SaveAsync(newRefreshToken, editorId, cancellationToken);
-            
+            await _repository.UpdateAsync(newRefreshToken, editorId, cancellationToken);
             return new RefreshTokenDto()
             {
                 Id = newRefreshToken?.Id ?? Guid.Empty,
