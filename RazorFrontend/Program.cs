@@ -9,6 +9,9 @@ namespace RazorFrontend
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            // Nạp thêm file settings.json
+            builder.Configuration.AddJsonFile("settings.json", optional: true, reloadOnChange: true);
+
             // Add services to the container.
             builder.Services.AddRazorPages();
             builder.Services.Configure<ApiSettings>(builder.Configuration.GetSection("ApiSettings"));
