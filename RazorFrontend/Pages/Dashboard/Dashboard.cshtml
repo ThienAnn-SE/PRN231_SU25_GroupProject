@@ -1,0 +1,51 @@
+@page
+@model DashboardModel
+
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<h2>Thống kê tổng quan</h2>
+
+<!-- Giao diện hiển thị thống kê -->
+<div class="row text-center">
+    <div class="col-md-4">
+        <div class="card bg-info text-white p-3 mb-4 rounded">
+            <h4>Ngành</h4>
+            <p class="display-5">@Model.MajorCount</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-success text-white p-3 mb-4 rounded">
+            <h4>Người dùng</h4>
+            <p class="display-5">@Model.UserCount</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-warning text-white p-3 mb-4 rounded">
+            <h4>Bài kiểm tra</h4>
+            <p class="display-5">@Model.TestCount</p>
+        </div>
+    </div>
+</div>
+
+<h3 class="mt-5">Biểu đồ kết quả kiểm tra</h3>
+<canvas id="testChart" width="400" height="200"></canvas>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        var ctx = document.getElementById('testChart').getContext('2d');
+        var testChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['A', 'B', 'C'],
+                datasets: [{
+                    label: 'Kết quả',
+                    data: [10, 20, 30],
+                    backgroundColor: 'rgba(75, 192, 192, 0.5)'
+                }]
+            }
+        });
+    </script>
+}
