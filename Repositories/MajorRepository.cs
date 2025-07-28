@@ -177,7 +177,7 @@ namespace Repositories
                 };
                 Personalities.Add(newMajorPersonality);
             }
-            if (!await _majorPersonalityRepository.SaveAllAsync(Personalities, null, CancellationToken.None))
+            if (Personalities.Count == 0 || !await _majorPersonalityRepository.SaveAllAsync(Personalities, null, CancellationToken.None))
             {
                 return false;
             }

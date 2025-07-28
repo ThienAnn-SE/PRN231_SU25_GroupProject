@@ -168,7 +168,7 @@ namespace AppCore.Entities
             builder.Property(x => x.TwoFactorEnabled).IsRequired(true).HasDefaultValue(false);
             builder.Property(x => x.LockoutEnd).IsRequired(false).HasDefaultValue(null);
             builder.Property(x => x.AccessFailedCount).IsRequired(true).HasDefaultValue(0);
-            builder.Property(x => x.Role).IsRequired(true).HasConversion<string>().HasDefaultValue(UserRole.User);
+            builder.Property(x => x.Role).IsRequired(true).HasConversion<string>();
 
             // Configure relationship with RefreshTokens
             builder.HasMany(x => x.RefreshTokens)

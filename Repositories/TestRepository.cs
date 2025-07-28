@@ -10,6 +10,8 @@ namespace Repositories
     {
         // Define methods for the TestRepository here, e.g.:
         Task<TestDto?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
+        Task<List<TestDto>> GetByPersonalTypeIdAsync(Guid personalTypeId, CancellationToken cancellationToken = default);
+        Task<TestDto?> GetRandomTestAsync(Guid personalTypeId, CancellationToken cancellationToken = default);
         Task<List<TestDto>> GetAll(CancellationToken cancellationToken = default);
         Task<bool> CreateAsync(CreateTestDto testDto, Guid? creatorId = null, CancellationToken cancellationToken = default);
         Task<bool> UpdateAsync(TestDto testDto, Guid? updaterId = null, CancellationToken cancellationToken = default);
@@ -176,6 +178,82 @@ namespace Repositories
                 CreatedAt = existingTest.CreatedAt
             };
             return await _testRepository.SaveAsync(updatedTest, updaterId, cancellationToken);
+        }
+
+        public async Task<List<TestDto>> GetByPersonalTypeIdAsync(Guid personalTypeId, CancellationToken cancellationToken = default)
+        {
+            var filter = new Expression<Func<Test, bool>>[]
+            {
+                x => x.PersonalityTypeId == personalTypeId
+            };
+            var tests = await _testRepository.FindAsync(filter, cancellationToken: cancellationToken);
+            if (tests.Count == 0)
+            {
+                return [];
+            }
+            var testDtos = tests.Select(x => new TestDto()
+            {
+                Id = x.Id,
+                PersonalityTypeId = x.PersonalityType.Id,
+                Title = x.Title,
+                Description = x.Description,
+                CreatedAt = x.CreatedAt,
+                Questions = [.. x.Questions.Select(q => new QuestionDto
+                {
+                    Id = q.Id,
+                    TestId = x.Id,
+                    Text = q.Text,
+                    Answers = [.. q.Answers.Select(a => new AnswerDto
+                    {
+                        Id = a.Id,
+                        QuestionId = q.Id,
+                        Text = a.Text
+                    })]
+                })]
+            }).ToList();
+            return testDtos;
+        }
+
+        public async Task<TestDto?> GetRandomTestAsync(Guid personalTypeId, CancellationToken cancellationToken = default)
+        {
+            var filter = new Expression<Func<Test, bool>>[]
+            {
+                x => x.PersonalityTypeId == personalTypeId
+            };
+            var tests = await _testRepository.FindAsync(filter, cancellationToken: cancellationToken);
+            if (tests.Count == 0)
+            {
+                return null;
+            }
+            var listGuid = tests.Select(x => x.Id).ToList();
+            Random random = new Random();
+            int index = random.Next(listGuid.Count);
+            var selectedId = listGuid[index];
+            var test = await _testRepository.FindByIdAsync(selectedId, cancellationToken: cancellationToken);
+            if (test != null)
+            {
+                return new TestDto()
+                {
+                    Id = test.Id,
+                    PersonalityTypeId = test.PersonalityType.Id,
+                    Title = test.Title,
+                    Description = test.Description,
+                    CreatedAt = test.CreatedAt,
+                    Questions = [.. test.Questions.Select(q => new QuestionDto
+                    {
+                        Id = q.Id,
+                        TestId = test.Id,
+                        Text = q.Text,
+                        Answers = [.. q.Answers.Select(a => new AnswerDto
+                        {
+                            Id = a.Id,
+                            QuestionId = q.Id,
+                            Text = a.Text
+                        })]
+                    })]
+                };
+            }
+            return null;
         }
     }
 }

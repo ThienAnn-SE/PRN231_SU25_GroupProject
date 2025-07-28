@@ -1,11 +1,11 @@
 ﻿using AppCore.BaseModel;
 using AppCore.Data;
-using Microsoft.EntityFrameworkCore;
+using AppCore.Dtos;
+using Azure;
 using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
+using System.Net.Http.Headers;
 using System.Security.Claims;
-using System.Text;
+using System.Text.Json;
 using WebApi.Extension;
 
 namespace WebApi.Middlewares
@@ -13,16 +13,18 @@ namespace WebApi.Middlewares
     public class AuthMiddleware
     {
         private readonly RequestDelegate _next;
-        private readonly JwtOptions _jwtOptions;
+        private readonly HttpClient _httpClient;
+        private readonly string _validateTokenUrl;
 
-        public AuthMiddleware(RequestDelegate next, IOptions<JwtOptions> jwtOptions)
+        public AuthMiddleware(RequestDelegate next, IHttpClientFactory httpClientFactory, IOptions<AuthApiSettings> authApiOption)
         {
             _next = next;
-            _jwtOptions = jwtOptions.Value;
+            _httpClient = httpClientFactory.CreateClient();
+            _validateTokenUrl = authApiOption.Value.ValidateTokenUrl;
         }
 
 
-        public async Task Invoke(HttpContext context, ApplicationDbContext dbContext)
+        public async Task Invoke(HttpContext context)
         {
             var accessToken = context.Request.Headers["Authorization"]
                 .FirstOrDefault()?.Split(" ").Last();
@@ -32,55 +34,68 @@ namespace WebApi.Middlewares
                 await _next(context);
                 return;
             }
-
-            ClaimsPrincipal? principal;
-            try
+            var userDto = await GetUserInfoAsync(accessToken);
+            if (userDto == null)
             {
-                principal = JwtExtensions.ValidateToken(accessToken, _jwtOptions);
-            }
-            catch (SecurityTokenException)
-            {
-                await _next(context);
+                context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                await context.Response.WriteAsync("Token is invalid.");
                 return;
             }
-
-            var accountIdString = principal.FindFirst(AppClaimTypes.Id)?.Value;
-            if (!Guid.TryParse(accountIdString, out var accountId) || accountId == Guid.Empty)
+            if (userDto.Data == null)
             {
-                await _next(context);
+                context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                await context.Response.WriteAsync(userDto.Message);
                 return;
             }
-
-            var now = DateTime.UtcNow;
-
-            var user = await dbContext.Users.FirstOrDefaultAsync(u => !u.DeletedAt.HasValue && u.Id == accountId);
-
-            var token = await dbContext.RefreshTokens.FirstOrDefaultAsync(t =>
-                !t.DeletedAt.HasValue &&
-                t.Token.Equals(accessToken) &&
-                t.UserId == accountId &&
-                t.ExpiryDate > now);
-
-            if (user == null || token == null)
+            if (userDto.Status == System.Net.HttpStatusCode.Unauthorized)
             {
-                await _next(context);
+                context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                await context.Response.WriteAsync(userDto.Message);
                 return;
             }
-            if (!token.IsActive)
+            else if (userDto.Status == System.Net.HttpStatusCode.NotFound)
             {
-                await _next(context);
+                context.Response.StatusCode = StatusCodes.Status404NotFound;
+                await context.Response.WriteAsync(userDto.Message);
                 return;
             }
             var claims = new[]
             {
-            new Claim(AppClaimTypes.Id, user.Id.ToString()),
-            new Claim(AppClaimTypes.Role, user.Role.ToString())
-             };
+                new Claim(AppClaimTypes.Id, userDto.Data.Id.ToString()),
+                new Claim(AppClaimTypes.Role, userDto.Data.Role.ToString())
+            };
 
             context.User = new ClaimsPrincipal(new ClaimsIdentity(claims, "jwt"));
 
             await _next(context);
         }
 
+        private async Task<ApiResponse<UserDto>?> GetUserInfoAsync(string token)
+        {
+            var request = new HttpRequestMessage(HttpMethod.Get, _validateTokenUrl);
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            var response = await _httpClient.SendAsync(request);
+
+            if (!response.IsSuccessStatusCode) return null;
+
+            var json = await response.Content.ReadAsStringAsync();
+            return JsonSerializer.Deserialize<ApiResponse<UserDto>?>(json, new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
+        }
     }
+
+    public class AuthApiSettings
+    {
+        public string ValidateTokenUrl { get; set; }
+    }
+
+    public class AppClaimTypes
+    {
+        public const string Id = "id";
+        public const string Role = "role";
+    }
+
 }

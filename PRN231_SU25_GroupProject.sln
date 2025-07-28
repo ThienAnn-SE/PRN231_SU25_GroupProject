@@ -3,13 +3,17 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.10.35004.147
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApi", "WebApi\WebApi.csproj", "{E7D8A545-2A33-4FFA-AB64-2ACB629AAA7C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ApiService", "WebApi\ApiService.csproj", "{E7D8A545-2A33-4FFA-AB64-2ACB629AAA7C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AppCore", "AppCore\AppCore.csproj", "{0F9E281B-CB65-494A-ACAF-8113E69EDA0E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Repositories", "Repositories\Repositories.csproj", "{001B6498-FF6A-4473-904E-47680AA809BA}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RazorFrontend", "RazorFrontend\RazorFrontend.csproj", "{C5136C46-BCD1-441A-9358-94EEC19F9065}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ApiGateway", "ApiGateway\ApiGateway.csproj", "{8F87BC64-5CCE-4DC0-A442-767EE39ED78C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ApiAuthentication", "AuthenticateApi\ApiAuthentication.csproj", "{9A29B21F-E93D-4255-BED9-D982D5C1FFD1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +37,14 @@ Global
 		{C5136C46-BCD1-441A-9358-94EEC19F9065}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C5136C46-BCD1-441A-9358-94EEC19F9065}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C5136C46-BCD1-441A-9358-94EEC19F9065}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8F87BC64-5CCE-4DC0-A442-767EE39ED78C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8F87BC64-5CCE-4DC0-A442-767EE39ED78C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8F87BC64-5CCE-4DC0-A442-767EE39ED78C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8F87BC64-5CCE-4DC0-A442-767EE39ED78C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9A29B21F-E93D-4255-BED9-D982D5C1FFD1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9A29B21F-E93D-4255-BED9-D982D5C1FFD1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9A29B21F-E93D-4255-BED9-D982D5C1FFD1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9A29B21F-E93D-4255-BED9-D982D5C1FFD1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

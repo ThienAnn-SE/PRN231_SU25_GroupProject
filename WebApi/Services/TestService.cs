@@ -10,6 +10,7 @@ namespace WebApi.Services
         // Define methods for the TestService here, e.g.:
         Task<ApiResponse> GetAllTestsAsync(CancellationToken cancellationToken = default);
         Task<ApiResponse> GetTestByIdAsync(Guid id, CancellationToken cancellationToken = default);
+        Task<ApiResponse> GetRandomTest(Guid personalTypeId, CancellationToken cancellationToken = default);
         Task<ApiResponse> GetTestByPersonalTypeAsync(Guid personalityTypeId, CancellationToken cancellationToken = default);
         Task<ApiResponse> CreateTestAsync(CreateTestDto testDto, CancellationToken cancellationToken = default);
         Task<ApiResponse> UpdateTestAsync(TestDto testDto, CancellationToken cancellationToken = default);
@@ -158,14 +159,27 @@ namespace WebApi.Services
             return ApiResponse<TestDto>.CreateResponse(System.Net.HttpStatusCode.OK, true, "Test retrieved successfully.", test);
         }
 
-        public Task<ApiResponse> GetTestByPersonalTypeAsync(Guid personalityTypeId, CancellationToken cancellationToken = default)
+        public async Task<ApiResponse> GetTestByPersonalTypeAsync(Guid personalityTypeId, CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            var tests = await unitOfWork.TestRepository.GetByPersonalTypeIdAsync(personalityTypeId, cancellationToken);
+            if (tests == null)
+                return ApiResponse.CreateNotFoundResponse("Test not found.");
+            return ApiResponses<TestDto>.CreateResponse(System.Net.HttpStatusCode.OK, true, "Tests retrived successfully", tests);
         }
 
         public Task<ApiResponse> UpdateTestAsync(TestDto testDto, CancellationToken cancellationToken = default)
         {
             throw new NotImplementedException();
+        }
+
+        public async Task<ApiResponse> GetRandomTest(Guid personalTypeId, CancellationToken cancellationToken = default)
+        {
+            var test = await unitOfWork.TestRepository.GetRandomTestAsync(personalTypeId, cancellationToken);
+            if ( test == null)
+            {
+                return ApiResponse.CreateNotFoundResponse("Test not found.");
+            }
+            return ApiResponse<TestDto>.CreateResponse(System.Net.HttpStatusCode.OK, true, "Test retrived successfully", test);
         }
     }
 }

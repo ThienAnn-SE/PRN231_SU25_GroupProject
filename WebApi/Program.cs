@@ -11,6 +11,10 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
+builder.Services.Configure<AuthApiSettings>(
+    builder.Configuration.GetSection("AuthApi"));
+builder.Services.Configure<RecommendMajorCountOptions>(builder.Configuration.GetSection("RecommendMajorCount"));
+
 builder.Services.AddSwaggerGen(options =>
 {
     options.SwaggerDoc("v1", new OpenApiInfo
@@ -47,7 +51,7 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 // Register repositories and unit of work
-builder.Services.AddRepositories(builder.Configuration.GetConnectionString("DefaultConnection"));
+builder.Services.AddRepositories();
 builder.Services.AddServices();
 builder.Services.AddAuthentication("Bearer")
     .AddJwtBearer("Bearer", options =>
@@ -67,11 +71,10 @@ builder.Services.AddAuthentication("Bearer")
             ClockSkew = TimeSpan.Zero
         };
     });
+builder.Services.AddHttpClient(); // If using named client, configure here
 builder.Services.AddAuthorization();
 // Add services
 builder.Services.AddMemoryCache();
-builder.Services.Configure<FingerprintOptions>(builder.Configuration.GetSection("Fingerprint"));
-builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("Jwt"));
 builder.Services.AddResponseCompression();
 builder.Services.AddCors();
 
@@ -92,14 +95,12 @@ app.UseResponseCompression();
 // Standard middleware
 app.UseHttpsRedirection();
 app.UseCors();
-
+// Your custom middleware
+app.UseMiddleware<AuthMiddleware>();
 // Authentication comes before Authorization
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Your custom middleware
-app.UseMiddleware<FingerprintMiddleware>();
-app.UseMiddleware<AuthMiddleware>();
 // Finally, endpoints
 app.MapControllers();
 app.Run();
