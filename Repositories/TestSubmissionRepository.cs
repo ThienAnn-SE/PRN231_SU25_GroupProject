@@ -15,7 +15,7 @@ namespace Repositories
         Task<bool> CreateAsync(TestSubmissionDto testSubmissionDto, Guid? creatorId = null, CancellationToken cancellationToken = default);
 
         Task<bool> UpdateAsync(TestSubmissionDto testSubmissionDto, Guid? updaterId = null, CancellationToken cancellationToken = default);
-
+        Task<List<TestSubmissionDto>> GetByPersonalTypeId(Guid personalTypeId, CancellationToken cancellationToken = default);
         Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken = default);
     }
 
@@ -121,6 +121,32 @@ namespace Repositories
                 PersonalityId = existingSubmission.PersonalityId,
                 Answers = existingSubmission.Answers.Select(a => a.AnswerId).ToList()
             };
+        }
+
+        public async Task<List<TestSubmissionDto>> GetByPersonalTypeId(Guid personalTypeId, CancellationToken cancellationToken = default)
+        {
+            var filter = new Expression<Func<TestSubmission, bool>>[]
+{
+                x => x.Test.PersonalityTypeId == personalTypeId
+            };
+            var existingSubmission = await _testSubmissionRepository.FindAsync(filter, cancellationToken: cancellationToken);
+            if (existingSubmission != null)
+            {
+                var testSubmissionDtos = existingSubmission.Select(x => new TestSubmissionDto()
+                {
+                    Id = x.Id,
+                    Date = x.Date,
+                    TestId = x.TestId,
+                    PersonalityId = x.PersonalityId,
+                    EditorId = x.EditorId,
+                    ExamineeId = x.ExamineeId,
+                    CreatedAt = x.CreatedAt,
+                    CreatorId = x.CreatorId,
+                    UpdatedAt = x.UpdatedAt
+                }).ToList();
+                return testSubmissionDtos;
+            }
+            return [];
         }
 
         public async Task<bool> UpdateAsync(TestSubmissionDto testSubmissionDto, Guid? updaterId = null, CancellationToken cancellationToken = default)
