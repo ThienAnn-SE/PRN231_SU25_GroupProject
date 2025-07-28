@@ -13,6 +13,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.Configure<AuthApiSettings>(
     builder.Configuration.GetSection("AuthApi"));
+builder.Services.Configure<RecommendMajorCountOptions>(builder.Configuration.GetSection("RecommendMajorCount"));
 
 builder.Services.AddSwaggerGen(options =>
 {

@@ -1,5 +1,6 @@
 ﻿using AppCore.BaseModel;
 using AppCore.Dtos;
+using Microsoft.Extensions.Options;
 using Repositories;
 
 namespace WebApi.Services
@@ -14,15 +15,19 @@ namespace WebApi.Services
         Task<bool> DeleteMajorAsync(Guid id, CancellationToken cancellationToken = default);
         Task<ApiResponse> AddNewPersonalityToMajorAsync(MajorPersonalityDto majorPersonalityDto, CancellationToken cancellationToken = default);
         Task<ApiResponse> DeletePersonalityFromMajorAsync(MajorPersonalityDto majorPersonalityDto, CancellationToken cancellationToken = default);
+        Task<ApiResponse> GetRecommendMajorsAsync(Guid personalityId, CancellationToken cancellationToken = default);
+
     }
 
     public class MajorService : IMajorService
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly int _recommendLimit;
 
-        public MajorService(IUnitOfWork unitOfWork)
+        public MajorService(IUnitOfWork unitOfWork, IOptions<RecommendMajorCountOptions> options)
         {
             _unitOfWork = unitOfWork;
+            _recommendLimit = options.Value.Limit;
         }
 
         public async Task<ApiResponse> GetMajorByIdAsync(Guid id, CancellationToken cancellationToken = default)
@@ -190,6 +195,41 @@ namespace WebApi.Services
                 return ApiResponse.CreateNotFoundResponse("No majors found for the given personality ID.");
             }
             return ApiResponses<MajorDto>.CreateResponse(System.Net.HttpStatusCode.OK, true, "Retrieved majors successfully", majors);
+        }
+
+        public async Task<ApiResponse> GetRecommendMajorsAsync(Guid personalityId, CancellationToken cancellationToken = default)
+        {
+            if (personalityId == Guid.Empty)
+            {
+                return ApiResponse.CreateBadRequestResponse("Personality ID is required.");
+            }
+            var personality = await _unitOfWork.PersonalityRepository.GetByIdAsync(personalityId, cancellationToken);
+            if (personality == null)
+            {
+                return ApiResponse.CreateNotFoundResponse("No personality found with the given ID.");
+            }
+            var majors = await _unitOfWork.MajorRepository.GetMajorsByPersonalityIdAsync(personalityId, cancellationToken);
+            if (majors == null || majors.Count == 0)
+            {
+                return ApiResponse.CreateNotFoundResponse("No majors found for the given personality ID.");
+            }
+            if (majors.Count <= _recommendLimit)
+            {
+                return ApiResponses<MajorDto>.CreateResponse(System.Net.HttpStatusCode.OK, true, "Retrieved majors successfully", majors);
+            }
+            var listIds = new HashSet<int>();
+            var selectedMajors = new List<MajorDto>(_recommendLimit);
+            while (listIds.Count != _recommendLimit)
+            {
+                Random random = new Random();
+                int index = random.Next(majors.Count);
+                if (listIds.Contains(index))
+                {
+                    continue;
+                }
+                selectedMajors.Add(majors[index]);
+            }
+            return ApiResponses<MajorDto>.CreateResponse(System.Net.HttpStatusCode.OK, true, "Retrieved majors successfully", selectedMajors);
         }
     }
 }

@@ -37,6 +37,18 @@
       "UpstreamHttpMethod": [ "GET" ]
     },
     {
+      "DownstreamPathTemplate": "/api/Major/Recommend/{personalTypeId}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5070
+        }
+      ],
+      "UpstreamPathTemplate": "/gateway/major/recommend/{personalTypeId}",
+      "UpstreamHttpMethod": [ "GET" ]
+    },
+    {
       "DownstreamPathTemplate": "/api/Major/Personality",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [

@@ -3,6 +3,7 @@ using AppCore.Dtos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using System.Net;
 using WebApi.Extension;
 using WebApi.Services;
@@ -15,6 +16,7 @@ namespace WebApi.Controllers
     public class MajorController : Controller
     {
         private readonly IMajorService _majorService;
+        private readonly int _recommendLimit;
 
         public MajorController(IMajorService majorService)
         {
@@ -109,6 +111,20 @@ namespace WebApi.Controllers
                 return BadRequest(ApiResponse.CreateBadRequestResponse("Major ID and personality data are required."));
             };
             var response = await _majorService.DeletePersonalityFromMajorAsync(majorPersonalityDto);
+            return Ok(response);
+        }
+
+        [AllowAnonymous]
+        [HttpGet("Recommend/{personalTypeId}")]
+        public async Task<IActionResult> GetRecommendMajors(Guid personalTypeId)
+        {
+            var response = await _majorService.GetRecommendMajorsAsync(personalTypeId, default);
+            if (response.Status.Equals(HttpStatusCode.NotFound)){
+                return NotFound(response);
+            }else if (response.Status.Equals(HttpStatusCode.BadRequest))
+            {
+                return BadRequest(response);
+            }
             return Ok(response);
         }
 
