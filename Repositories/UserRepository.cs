@@ -13,8 +13,10 @@ namespace Repositories
         Task<bool> RegisterAsync(RegisterDto registerDto);
         Task<bool> IsUserExistsAsync(string username);
         Task<UserDto?> GetByUsernameAsync(string username, CancellationToken cancellationToken = default);
+        Task<UserDto?> GetByEmailAsync(string email, CancellationToken cancellationToken = default);
         Task<UserDto?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
         Task<List<UserDto>> GetAllAsync(CancellationToken cancellationToken = default);
+        Task<bool> InitTestUser();
     }
 
     public class UserRepository : IUserRepository
@@ -34,7 +36,7 @@ namespace Repositories
         {
             var filter = new Expression<Func<User, bool>>[]
             {
-                x => x.Email == loginDto.UserName
+                x => x.Email == loginDto.Email
             };
             var entity = await _repository
                 .FindOneAsync(filter, cancellationToken: cancellationToken);
@@ -85,6 +87,31 @@ namespace Repositories
             return await _repository.SaveAsync(new User(registerDto.UserName, registerDto.Email, hashedPassword, salt), default, default);
         }
 
+        public async Task<bool> InitTestUser()
+        {
+            var salt1 = GenerateSalt();
+            var salt2 = GenerateSalt();
+            var salt3 = GenerateSalt();
+            var hashedPassword1 = PasswordHasher.HashPassword("@1", salt1);
+            var hashedPassword2 = PasswordHasher.HashPassword("@1", salt2);
+            var hashedPassword3 = PasswordHasher.HashPassword("@1", salt3);
+            var admin = new User("Admin", "admin@gmail.com", hashedPassword1, salt1) {
+                Id = Guid.NewGuid(),
+                Role = UserRole.Admin
+            };
+            var manager = new User("Manager", "manager@gmail.com", hashedPassword2, salt2) {
+                Id = Guid.NewGuid(),
+                Role = UserRole.Manager
+            };
+            var user = new User("user", "user@gmail.com", hashedPassword3, salt3) {
+                Id = Guid.NewGuid() 
+            };
+            var result1 = await _repository.SaveAsync(admin, default, default);
+            var result2 = await _repository.SaveAsync(manager, default, default);
+            var result3 =await _repository.SaveAsync(user, default, default);
+            return result1 && result2 && result3;
+        }
+
         private static string GenerateSalt()
         {
             return Guid.NewGuid().ToString("N");
@@ -94,7 +121,7 @@ namespace Repositories
         {
             var filter = new Expression<Func<User, bool>>[]
             {
-                x => x.Username.Equals(username)
+                x => x.Username == username
             };
             var entity = await _repository.FindOneAsync(filter, cancellationToken: default);
             return entity != null;
@@ -151,6 +178,30 @@ namespace Repositories
         public Task<List<UserDto>> GetAllAsync(CancellationToken cancellationToken = default)
         {
             throw new NotImplementedException();
+        }
+
+        public async Task<UserDto?> GetByEmailAsync(string email, CancellationToken cancellationToken = default)
+        {
+            var filter = new Expression<Func<User, bool>>[]
+            {
+                x => x.Email.Equals(email)
+            };
+            var entity = await _repository.FindOneAsync(filter, cancellationToken: cancellationToken);
+            if (entity == null)
+            {
+                return null;
+            }
+            return new UserDto()
+            {
+                Id = entity.Id,
+                Username = entity.Username,
+                Email = entity.Email,
+                EmailConfirmed = entity.EmailConfirmed,
+                TwoFactorEnabled = entity.TwoFactorEnabled,
+                LockoutEnd = entity.LockoutEnd,
+                AccessFailedCount = entity.AccessFailedCount,
+                Role = entity.Role
+            };
         }
     }
 }

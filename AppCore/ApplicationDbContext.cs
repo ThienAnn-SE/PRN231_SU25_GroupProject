@@ -1,6 +1,7 @@
 using AppCore.BaseModel;
 using AppCore.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 
 namespace AppCore.Data
 {
@@ -84,7 +85,25 @@ namespace AppCore.Data
             : base(options)
         {
         }
-        
+
+        public ApplicationDbContext() { }
+
+        private static string GetConnectionString()
+        {
+            IConfigurationRoot configuration = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json")
+                .Build();
+            return configuration.GetConnectionString("DefaultConnection");
+        }
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            optionsBuilder.UseSqlServer(GetConnectionString());
+            optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+            optionsBuilder.EnableDetailedErrors();
+        }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

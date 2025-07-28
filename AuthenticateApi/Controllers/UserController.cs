@@ -13,12 +13,20 @@ namespace WebApi.Controllers
     [ApiController]
     public class UserController : ControllerBase
     {
-       private readonly IUserService _userService;
+        private readonly IUserService _userService;
         public UserController(IUserService userService)
         {
             _userService = userService ?? throw new ArgumentNullException(nameof(userService));
         }
 
+        [HttpGet("Init")]
+        public async Task<IActionResult> InitTestUsers()
+        {
+            await _userService.InitTestUsers(); ;
+            return Ok();
+        }
+
+        [Authorize]
         [HttpGet("{id}")]
         public async Task<ApiResponse> GetById(Guid id)
         {
@@ -35,7 +43,7 @@ namespace WebApi.Controllers
         {
             if (loginDto == null)
             {
-                ApiResponse.CreateBadRequestResponse("Login data is required.");
+                return ApiResponse.CreateBadRequestResponse("Login data is required.");
             }
             var response = await _userService.Login(loginDto, jwtOptions.Value);
             return response;
@@ -50,6 +58,36 @@ namespace WebApi.Controllers
             }
             var response = await _userService.Register(registerDto);
             return response;
+        }
+
+        [HttpGet("Validate-token")]
+        public async Task<IActionResult> ValidateToken([FromServices] IOptions<JwtOptions> jwtOptions)
+        {
+            var response = await _userService.ValidateToken(jwtOptions.Value);
+            if (response.Status == System.Net.HttpStatusCode.Unauthorized)
+            {
+                return Unauthorized(response);
+            }
+            else if (response.Status == System.Net.HttpStatusCode.NotFound)
+            {
+                return NotFound(response);
+            }
+            return Ok(response);
+        }
+
+        [Authorize]
+        [HttpGet("/Keep-alive")]
+        public async Task<IActionResult> KeepAliveToken([FromServices] IOptions<JwtOptions> jwtOptions)
+        {
+            var result = await _userService.KeepAlive(jwtOptions.Value);
+            if (result.Status == System.Net.HttpStatusCode.Unauthorized)
+            {
+                return Unauthorized(result);
+            }else if (result.Status == System.Net.HttpStatusCode.NotFound)
+            {
+                NotFound(result);
+            }
+            return Ok(result);
         }
     }
 }
