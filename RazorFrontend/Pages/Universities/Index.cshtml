@@ -32,6 +32,7 @@
                         <td>@university.Email</td>
                         <td><a href="@university.Website" target="_blank">@university.Website</a></td>
                         <td class="text-end">
+                            <a class="btn btn-sm btn-outline-primary" asp-page="Detail" asp-route-id="@university.Id">✏🔍 Detail</a>
                             <a class="btn btn-sm btn-outline-primary" asp-page="Edit" asp-route-id="@university.Id">✏️ Edit</a>
                             <a class="btn btn-sm btn-outline-danger ms-2" asp-page="Delete" asp-route-id="@university.Id">🗑️ Delete</a>
                         </td>
