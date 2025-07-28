@@ -16,6 +16,11 @@ namespace WebApi.Extension
             EvsI, SvsN, TvsF, JvsP
         }
 
+        private enum DISCTrait
+        {
+            D, I, S, C
+        }
+
         private enum MBTITrait
         {
             E, I,
@@ -76,6 +81,42 @@ namespace WebApi.Extension
                 traitScores[MBTITrait.T] >= traitScores[MBTITrait.F] ? "T" : "F",
                 traitScores[MBTITrait.J] >= traitScores[MBTITrait.P] ? "J" : "P"
             );
+        }
+
+        private static DISCTrait GetDISCTraitByIndex(int index)
+        {
+            // Assume equal distribution: 7 questions per trait (7 * 4 = 28)
+            return (index % 4) switch
+            {
+                0 => DISCTrait.D,
+                1 => DISCTrait.I,
+                2 => DISCTrait.S,
+                3 => DISCTrait.C,
+                _ => throw new InvalidOperationException()
+            };
+        }
+
+        public static string EvaluateDiscTest(List<int> userAnswers)
+        {
+            if (userAnswers.Count != 28)
+                throw new ArgumentException("Must provide exactly 28 answers.");
+
+            var scores = new Dictionary<DISCTrait, int>
+    {
+        { DISCTrait.D, 0 },
+        { DISCTrait.I, 0 },
+        { DISCTrait.S, 0 },
+        { DISCTrait.C, 0 }
+    };
+
+            for (int i = 0; i < userAnswers.Count; i++)
+            {
+                var trait = GetDISCTraitByIndex(i);
+                scores[trait] += userAnswers[i]; // assumes 0 or 1 input
+            }
+
+            var dominant = scores.OrderByDescending(kvp => kvp.Value).First();
+            return dominant.Key.ToString(); // returns "D", "I", "S", or "C"
         }
 
         public static string EvaluateOceanTest(List<int> userAnswers)

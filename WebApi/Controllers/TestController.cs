@@ -60,5 +60,29 @@ namespace WebApi.Controllers
             }
             return Ok(response);
         }
+
+        [Authorize]
+        [HttpGet("PersonalType/{personalTypeId}")]
+        public async Task<IActionResult> GetByPersonalTypeId(Guid personalTypeId, CancellationToken cancellationToken = default)
+        {
+            var response = await _testService.GetTestByPersonalTypeAsync(personalTypeId, cancellationToken);
+            if (response.Status == System.Net.HttpStatusCode.NotFound)
+            {
+                return NotFound(response);
+            }
+            return Ok(response);
+        }
+
+        [Authorize]
+        [HttpGet("Random/{personalTypeId}")]
+        public async Task<IActionResult> GetRandomTest(Guid personalTypeId, CancellationToken cancellationToken = default)
+        {
+            var response = await _testService.GetRandomTest(personalTypeId, cancellationToken);
+            if (response.Status == System.Net.HttpStatusCode.NotFound)
+            {
+                return NotFound(response);
+            }
+            return Ok(response);
+        }
     }
 }

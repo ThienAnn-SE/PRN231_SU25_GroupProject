@@ -46,6 +46,22 @@ namespace WebApi.Controllers
             return Ok(response);
         }
 
+        [Authorize]
+        [HttpGet("PersonalType/{personalTypeId}")]
+        public async Task<IActionResult> GetByPersonalTypeIdAsync(Guid personalTypeId, CancellationToken cancellationToken = default)
+        {
+            if (personalTypeId == Guid.Empty)
+            {
+                return BadRequest(ApiResponse.CreateBadRequestResponse("Test submission ID is required."));
+            }
+            var response = await _testSubmissionService.GetByPersonalTypeIdAsync(personalTypeId, cancellationToken);
+            if (response.Status == System.Net.HttpStatusCode.NotFound)
+            {
+                return NotFound(response);
+            }
+            return Ok(response);
+        }
+
         [HttpPost]
         public async Task<IActionResult> CreateAsync([FromBody] TestSubmissionDto testSubmissionDto, CancellationToken cancellationToken = default)
         {

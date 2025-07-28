@@ -13,6 +13,18 @@
       "UpstreamHttpMethod": [ "GET", "POST" ]
     },
     {
+      "DownstreamPathTemplate": "/api/TestSubmission/PersonalType/{personalTypeId}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5070
+        }
+      ],
+      "UpstreamPathTemplate": "/gateway/test-submission/personal-type/{personalTypeId}",
+      "UpstreamHttpMethod": [ "GET" ]
+    },
+    {
       "DownstreamPathTemplate": "/api/TestSubmission/{id}",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
