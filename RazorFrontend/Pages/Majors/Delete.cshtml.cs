@@ -1,3 +1,4 @@
+using AppCore.BaseModel;
 using AppCore.Dtos;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -24,10 +25,14 @@ namespace RazorFrontend.Pages.Majors
 
         public string? ErrorMessage { get; set; }
 
+        private Dictionary<Guid, string> _universityNames = new();
+
         public async Task<IActionResult> OnGetAsync()
         {
-            var client = _factory.CreateClient();
-            var endpoint = $"{_config["ApiSettings:MajorListEndpoint"]}/{Id}";
+            await LoadUniversities();
+
+            var client = _factory.CreateClient("ApiClient");
+            var endpoint = string.Format(_config["ApiSettings:MajorGetByIdEndpoint"], Id);
 
             var response = await client.GetAsync(endpoint);
 
@@ -37,10 +42,19 @@ namespace RazorFrontend.Pages.Majors
                 return Page();
             }
 
-            Major = await response.Content.ReadFromJsonAsync<MajorDto>();
-            if (Major == null)
+            var json = await response.Content.ReadAsStringAsync();
+            var apiResponse = System.Text.Json.JsonSerializer.Deserialize<ApiResponse<MajorDto>>(json, new System.Text.Json.JsonSerializerOptions
             {
-                ErrorMessage = "Major not found.";
+                PropertyNameCaseInsensitive = true
+            });
+
+            if (apiResponse?.Success == true && apiResponse.Data != null)
+            {
+                Major = apiResponse.Data;
+            }
+            else
+            {
+                ErrorMessage = apiResponse?.Message ?? "Major not found.";
             }
 
             return Page();
@@ -48,18 +62,53 @@ namespace RazorFrontend.Pages.Majors
 
         public async Task<IActionResult> OnPostAsync()
         {
-            var client = _factory.CreateClient();
-            var endpoint = $"{_config["ApiSettings:MajorListEndpoint"]}/{Id}";
-
-            var response = await client.DeleteAsync(endpoint);
-
-            if (response.IsSuccessStatusCode)
+            try
             {
-                return RedirectToPage("Index");
+                var client = _factory.CreateClient("ApiClient");
+                var endpoint = string.Format(_config["ApiSettings:MajorDeleteEndpoint"], Id);
+
+                var response = await client.DeleteAsync(endpoint);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    return RedirectToPage("Index");
+                }
+
+                var errorContent = await response.Content.ReadAsStringAsync();
+                ErrorMessage = $"Delete failed (Status: {response.StatusCode}): {errorContent}";
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"Error: {ex.Message}";
             }
 
-            ErrorMessage = $"Delete failed: {response.ReasonPhrase}";
             return Page();
+        }
+
+        private async Task LoadUniversities()
+        {
+            var client = _factory.CreateClient("ApiClient");
+            var endpoint = _config["ApiSettings:UniversityListEndpoint"];
+            var response = await client.GetAsync(endpoint);
+            if (response.IsSuccessStatusCode)
+            {
+                var json = await response.Content.ReadAsStringAsync();
+                var apiResponse = System.Text.Json.JsonSerializer.Deserialize<ApiResponses<UniversityDto>>(json, new System.Text.Json.JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+
+                if (apiResponse?.Success == true && apiResponse.Data != null)
+                {
+                    _universityNames = apiResponse.Data.ToDictionary(u => u.Id, u => u.Name);
+                }
+            }
+        }
+
+        public string GetUniversityName(Guid? universityId)
+        {
+            if (universityId == null) return "Unknown";
+            return _universityNames.TryGetValue(universityId.Value, out var name) ? name : "Unknown";
         }
     }
 }

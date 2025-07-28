@@ -36,7 +36,7 @@ namespace WebApi.Controllers
         {
             if (id == Guid.Empty)
             {
-                return BadRequest( ApiResponse.CreateBadRequestResponse("Test submission ID is required."));
+                return BadRequest(ApiResponse.CreateBadRequestResponse("Test submission ID is required."));
             }
             var response = await _testSubmissionService.GetByIdAsync(id, cancellationToken);
             if (response.Status == System.Net.HttpStatusCode.NotFound)

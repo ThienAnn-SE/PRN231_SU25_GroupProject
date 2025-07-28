@@ -26,7 +26,6 @@ namespace WebApi.Controllers
             return Ok();
         }
 
-        [Authorize]
         [HttpGet("{id}")]
         public async Task<ApiResponse> GetById(Guid id)
         {
@@ -75,7 +74,6 @@ namespace WebApi.Controllers
             return Ok(response);
         }
 
-        [Authorize]
         [HttpGet("/Keep-alive")]
         public async Task<IActionResult> KeepAliveToken([FromServices] IOptions<JwtOptions> jwtOptions)
         {

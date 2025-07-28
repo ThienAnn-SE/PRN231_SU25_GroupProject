@@ -151,7 +151,9 @@
       "UpstreamHeaderTransform": {},
       "UpstreamHost": null,
       "UpstreamHttpMethod": [
-        "GET"
+        "GET",
+        "PUT",
+        "DELETE"
       ],
       "UpstreamPathTemplate": "/gateway/major/{id}"
     },
@@ -1388,7 +1390,8 @@
       "UpstreamHost": null,
       "UpstreamHttpMethod": [
         "GET",
-        "PUT"
+        "PUT",
+        "DELETE"
       ],
       "UpstreamPathTemplate": "/gateway/university/{id}"
     },

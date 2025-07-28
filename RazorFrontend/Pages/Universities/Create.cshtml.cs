@@ -53,9 +53,8 @@ namespace RazorFrontend.Pages.Universities
             if (!ModelState.IsValid)
                 return Page();
 
-            var client = _clientFactory.CreateClient();
-            var baseUrl = _config["ApiSettings:BaseUrl"];
-            var endpoint = $"{baseUrl}api/university";
+            var client = _clientFactory.CreateClient("ApiClient");
+            var endpoint = _config["ApiSettings:UniversityCreateEndpoint"];
 
             var dto = new CreateUpdateUniversityDto
             {
