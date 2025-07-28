@@ -35,6 +35,18 @@
       ],
       "UpstreamPathTemplate": "/gateway/user/{userId}",
       "UpstreamHttpMethod": [ "GET" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/User/Keep-alive",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5180
+        }
+      ],
+      "UpstreamPathTemplate": "/gateway/user/keep-alive",
+      "UpstreamHttpMethod": [ "GET" ]
     }
   ]
 }

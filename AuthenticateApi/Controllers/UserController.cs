@@ -13,7 +13,7 @@ namespace WebApi.Controllers
     [ApiController]
     public class UserController : ControllerBase
     {
-       private readonly IUserService _userService;
+        private readonly IUserService _userService;
         public UserController(IUserService userService)
         {
             _userService = userService ?? throw new ArgumentNullException(nameof(userService));
@@ -73,6 +73,21 @@ namespace WebApi.Controllers
                 return NotFound(response);
             }
             return Ok(response);
+        }
+
+        [Authorize]
+        [HttpGet("/Keep-alive")]
+        public async Task<IActionResult> KeepAliveToken([FromServices] IOptions<JwtOptions> jwtOptions)
+        {
+            var result = await _userService.KeepAlive(jwtOptions.Value);
+            if (result.Status == System.Net.HttpStatusCode.Unauthorized)
+            {
+                return Unauthorized(result);
+            }else if (result.Status == System.Net.HttpStatusCode.NotFound)
+            {
+                NotFound(result);
+            }
+            return Ok(result);
         }
     }
 }
