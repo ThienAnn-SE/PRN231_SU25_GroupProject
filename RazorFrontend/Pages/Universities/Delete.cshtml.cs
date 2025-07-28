@@ -1,3 +1,4 @@
+using AppCore.BaseModel;
 using AppCore.Dtos;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -27,28 +28,34 @@ namespace RazorFrontend.Pages.Universities
 
         public async Task<IActionResult> OnGetAsync()
         {
-            var client = _clientFactory.CreateClient();
-            var baseUrl = _config["ApiSettings:BaseUrl"];
-            var endpoint = $"{baseUrl}api/university/{Id}";
+            var client = _clientFactory.CreateClient("ApiClient");
+            var endpoint = string.Format(_config["ApiSettings:UniversityByIdEndpoint"], Id);
 
             try
             {
                 var response = await client.GetAsync(endpoint);
                 if (!response.IsSuccessStatusCode)
                 {
-                    ErrorMessage = "Unable to load university data.";
+                    ErrorMessage = $"Unable to load university data. Status: {response.StatusCode}";
                     return Page();
                 }
 
                 var json = await response.Content.ReadAsStringAsync();
-                University = JsonSerializer.Deserialize<UniversityDto>(json, new JsonSerializerOptions
+                ErrorMessage = $"Debug - API Response: {json}";
+                
+                var apiResponse = JsonSerializer.Deserialize<ApiResponse<UniversityDto>>(json, new JsonSerializerOptions
                 {
                     PropertyNameCaseInsensitive = true
                 });
 
-                if (University == null)
+                if (apiResponse?.Success == true && apiResponse.Data != null)
                 {
-                    ErrorMessage = "University not found.";
+                    University = apiResponse.Data;
+                    ErrorMessage = null; // Clear debug message
+                }
+                else
+                {
+                    ErrorMessage = apiResponse?.Message ?? "University not found.";
                 }
             }
             catch (Exception ex)
@@ -61,9 +68,8 @@ namespace RazorFrontend.Pages.Universities
 
         public async Task<IActionResult> OnPostAsync()
         {
-            var client = _clientFactory.CreateClient();
-            var baseUrl = _config["ApiSettings:BaseUrl"];
-            var endpoint = $"{baseUrl}api/university/{Id}";
+            var client = _clientFactory.CreateClient("ApiClient");
+            var endpoint = string.Format(_config["ApiSettings:UniversityDeleteEndpoint"], Id);
 
             try
             {

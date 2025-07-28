@@ -28,9 +28,7 @@
                             <option value="">-- Select University --</option>
                             @foreach (var uni in Model.UniversityList)
                             {
-                                <option value="@uni.Id" selected="@(uni.Id == Model.Input.UniversityId)">
-                                    @uni.Name
-                                </option>
+                                <option value="@uni.Id">@uni.Name</option>
                             }
                         </select>
                         <span asp-validation-for="Input.UniversityId" class="text-danger small"></span>

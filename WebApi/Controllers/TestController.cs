@@ -51,10 +51,11 @@ namespace WebApi.Controllers
                 return NotFound(ApiResponse.CreateBadRequestResponse("Test data is required."));
             }
             var response = await _testService.CreateTestAsync(testDto, cancellationToken);
-            if(response.Status == System.Net.HttpStatusCode.NotFound)
+            if (response.Status == System.Net.HttpStatusCode.NotFound)
             {
                 return NotFound(response);
-            }else if (response.Status == System.Net.HttpStatusCode.BadRequest)
+            }
+            else if (response.Status == System.Net.HttpStatusCode.BadRequest)
             {
                 return BadRequest(response);
             }

@@ -22,7 +22,7 @@
         }
       ],
       "UpstreamPathTemplate": "/gateway/university/{id}",
-      "UpstreamHttpMethod": [ "GET", "PUT" ]
+      "UpstreamHttpMethod": [ "GET", "PUT", "DELETE" ]
     }
   ]
 }
