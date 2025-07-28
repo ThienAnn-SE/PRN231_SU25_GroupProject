@@ -23,7 +23,7 @@ namespace RazorFrontend.Pages.Universities
         {
             var client = _factory.CreateClient();
             var baseUrl = _config["ApiSettings:BaseUrl"];
-            var endpoint = $"{baseUrl}api/university";
+            var endpoint = $"{baseUrl}api/University";
 
             var response = await client.GetAsync(endpoint);
             if (response.IsSuccessStatusCode)
