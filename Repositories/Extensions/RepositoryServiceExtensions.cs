@@ -1,6 +1,7 @@
 using AppCore;
 using AppCore.Data;
 using Microsoft.Extensions.DependencyInjection;
+using Repositories.Interfaces;
 
 namespace Repositories.Extensions
 {

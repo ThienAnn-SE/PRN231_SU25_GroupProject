@@ -1,20 +1,11 @@
-﻿using AppCore.BaseModel;
+﻿using ApiService.Services.Interfaces;
+using AppCore.BaseModel;
 using AppCore.Dtos;
-using Repositories;
+using Repositories.Interfaces;
 using WebApi.Extension;
 
-namespace WebApi.Services
+namespace ApiService.Services
 {
-    public interface ITestService
-    {
-        // Define methods for the TestService here, e.g.:
-        Task<ApiResponse> GetAllTestsAsync(CancellationToken cancellationToken = default);
-        Task<ApiResponse> GetTestByIdAsync(Guid id, CancellationToken cancellationToken = default);
-        Task<ApiResponse> GetRandomTest(Guid personalTypeId, CancellationToken cancellationToken = default);
-        Task<ApiResponse> GetTestByPersonalTypeAsync(Guid personalityTypeId, CancellationToken cancellationToken = default);
-        Task<ApiResponse> CreateTestAsync(CreateTestDto testDto, CancellationToken cancellationToken = default);
-        Task<ApiResponse> UpdateTestAsync(TestDto testDto, CancellationToken cancellationToken = default);
-    }
 
     public class TestService : BaseService, ITestService
     {
@@ -25,7 +16,7 @@ namespace WebApi.Services
 
         public async Task<ApiResponse> CreateTestAsync(CreateTestDto testDto, CancellationToken cancellationToken = default)
         {
-                        if (string.IsNullOrWhiteSpace(testDto.Title) || string.IsNullOrWhiteSpace(testDto.Description))
+            if (string.IsNullOrWhiteSpace(testDto.Title) || string.IsNullOrWhiteSpace(testDto.Description))
             {
                 return ApiResponse.CreateBadRequestResponse("Test title and description cannot be empty.");
             }

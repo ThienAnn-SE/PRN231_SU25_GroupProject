@@ -1,18 +1,11 @@
-﻿using AppCore.BaseModel;
+﻿using ApiService.Services.Interfaces;
+using AppCore.BaseModel;
 using AppCore.Dtos;
-using Repositories;
+using Repositories.Interfaces;
 using WebApi.Extension;
 
-namespace WebApi.Services
+namespace ApiService.Services
 {
-    public interface ITestSubmissionService
-    {
-        Task<ApiResponse> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
-        Task<ApiResponse> GetByPersonalTypeIdAsync(Guid personTypeId, CancellationToken cancellationToken = default);
-        Task<ApiResponse> GetAllAsync(CancellationToken cancellationToken = default);
-        Task<ApiResponse> CreateAsync(TestSubmissionDto testSubmissionDto, Guid? creatorId = null, CancellationToken cancellationToken = default);
-    }
-
     public class TestSubmissionService : BaseService, ITestSubmissionService
     {
         public TestSubmissionService(IUnitOfWork unitOfWork) : base(unitOfWork)

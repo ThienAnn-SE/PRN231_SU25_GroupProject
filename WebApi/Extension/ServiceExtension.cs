@@ -1,6 +1,7 @@
-﻿using WebApi.Services;
+﻿using ApiService.Services;
+using ApiService.Services.Interfaces;
 
-namespace WebApi.Extension
+namespace ApiService.Extension
 {
     public static class ServiceExtension
     {

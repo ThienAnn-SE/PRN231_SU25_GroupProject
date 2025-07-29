@@ -1,14 +1,12 @@
-﻿using AppCore.BaseModel;
+﻿using ApiService.Services.Interfaces;
+using AppCore.BaseModel;
 using AppCore.Dtos;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 using System.Net;
 using WebApi.Extension;
-using WebApi.Services;
 
-namespace WebApi.Controllers
+namespace ApiService.Controllers
 {
     [Authorize]
     [ApiController]

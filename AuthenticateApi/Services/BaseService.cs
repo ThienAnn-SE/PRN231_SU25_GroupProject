@@ -1,6 +1,6 @@
-﻿using Repositories;
+﻿using Repositories.Interfaces;
 
-namespace WebApi.Services
+namespace ApiAuthentication.Services
 {
     public interface IBaseService
     {
