@@ -22,8 +22,10 @@ namespace Repositories
 
     public class PersonalityRepository : IPersonalityRepository
     {
-        private readonly CrudRepository<Personality> _personalityRepository;
+        //private readonly CrudRepository<Personality> _personalityRepository;
         private readonly CrudRepository<PersonalityType> _personalityTypeRepository;
+        private readonly PersonalityWithIncludesRepository _personalityRepository;
+
         private class PersonalityWithIncludesRepository : CrudRepository<Personality>
         {
             public PersonalityWithIncludesRepository(DbContext dbContext, IDbTransaction transaction)
@@ -39,13 +41,22 @@ namespace Repositories
             DbContext dbContext,
             IDbTransaction transaction)
         {
-            _personalityRepository = new CrudRepository<Personality>(dbContext, transaction);
+            _personalityRepository = new PersonalityWithIncludesRepository(dbContext, transaction);
             _personalityTypeRepository = new CrudRepository<PersonalityType>(dbContext, transaction);
         }
 
-        public Task<bool> CreateAsync(PersonalityDto personalityDto, Guid? creatorId = null, CancellationToken cancellationToken = default)
+        public async Task<bool> CreateAsync(PersonalityDto dto, Guid? creatorId = null, CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            var entity = new Personality
+            {
+                Id = Guid.NewGuid(),
+                Name = dto.Name,
+                Description = dto.Description,
+                PersonalityTypeId = dto.PersonalityTypeId,
+            };
+
+            await _personalityRepository.SaveAsync(entity, creatorId, cancellationToken);
+            return true;
         }
 
         public Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken = default)
