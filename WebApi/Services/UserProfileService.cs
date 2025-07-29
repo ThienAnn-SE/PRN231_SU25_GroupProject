@@ -1,18 +1,10 @@
-﻿using AppCore.BaseModel;
+﻿using ApiService.Services.Interfaces;
+using AppCore.BaseModel;
 using AppCore.Dtos;
-using AppCore.Entities;
-using Repositories;
+using Repositories.Interfaces;
 
-namespace WebApi.Services
+namespace ApiService.Services
 {
-    public interface IUserProfileService
-    {
-        Task<ApiResponse> GetUserProfileByIdAsync(Guid userId, CancellationToken cancellationToken = default);
-        Task<ApiResponse> GetAllUserProfile(CancellationToken cancellationToken = default);
-        Task<ApiResponse> CreateUserProfileAsync(CreateUserProfileDto userProfileDto, CancellationToken cancellationToken = default);
-        Task<ApiResponse> UpdateUserProfileAsync(UserProfileDto userProfileDto, CancellationToken cancellationToken = default);
-    }
-
     public class UserProfileService : BaseService, IUserProfileService
     {
         public UserProfileService(IUnitOfWork unitOfWork) : base(unitOfWork)

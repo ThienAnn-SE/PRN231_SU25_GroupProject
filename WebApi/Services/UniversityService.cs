@@ -1,26 +1,17 @@
-﻿using AppCore.BaseModel;
+﻿using ApiService.Services.Interfaces;
+using AppCore.BaseModel;
 using AppCore.Dtos;
-using Repositories;
+using Repositories.Interfaces;
 using WebApi.Extension;
 
-namespace WebApi.Services
+namespace ApiService.Services
 {
-    public interface IUniversityService
+    public class UniversityService : BaseService, IUniversityService
     {
-        Task<ApiResponse> GetUniversityByIdAsync(Guid id, CancellationToken cancellationToken = default);
-        Task<ApiResponse> GetAllUniversitiesAsync(CancellationToken cancellationToken = default);
-        Task<ApiResponse> CreateUniversityAsync(CreateUpdateUniversityDto universityDto, Guid? creatorId = null, CancellationToken cancellationToken = default);
-        Task<ApiResponse> UpdateUniversityAsync(Guid id, CreateUpdateUniversityDto universityDto, Guid? updaterId = null, CancellationToken cancellationToken = default);
-        Task<bool> DeleteUniversityAsync(Guid id, CancellationToken cancellationToken = default);
-    }
 
-    public class UniversityService : IUniversityService
-    {
-        private readonly IUnitOfWork _unitOfWork; 
-
-        public UniversityService(IUnitOfWork unitOfWork) 
+        public UniversityService(IUnitOfWork unitOfWork) : base(unitOfWork)
         {
-            _unitOfWork = unitOfWork;
+
         }
 
         public async Task<ApiResponse> GetUniversityByIdAsync(Guid id, CancellationToken cancellationToken = default)
@@ -29,7 +20,7 @@ namespace WebApi.Services
             {
                 return ApiResponse.CreateBadRequestResponse("Invalid university ID provided."); // Return null if the ID is invalid
             }
-            var university = await _unitOfWork.UniversityRepository.GetByIdAsync(id, cancellationToken);
+            var university = await unitOfWork.UniversityRepository.GetByIdAsync(id, cancellationToken);
             if (university == null)
             {
                 return ApiResponse.CreateNotFoundResponse("University does not exist"); // Return null if the university is not found
@@ -39,7 +30,7 @@ namespace WebApi.Services
 
         public async Task<ApiResponse> GetAllUniversitiesAsync(CancellationToken cancellationToken = default)
         {
-            var universities = await _unitOfWork.UniversityRepository.GetAll(cancellationToken);
+            var universities = await unitOfWork.UniversityRepository.GetAll(cancellationToken);
             if (universities == null || !universities.Any())
             {
                 return ApiResponse.CreateNotFoundResponse("No universities found.");
@@ -53,7 +44,7 @@ namespace WebApi.Services
             {
                 return apiResponse; // Return the error response if validation fails
             }
-            var success = await _unitOfWork.UniversityRepository.CreateAsync(universityDto, creatorId, cancellationToken);
+            var success = await unitOfWork.UniversityRepository.CreateAsync(universityDto, creatorId, cancellationToken);
             if (!success)
             {
                 return ApiResponse.CreateBadRequestResponse("University with this name might already exist or name is invalid.");
@@ -67,7 +58,7 @@ namespace WebApi.Services
             {
                 return apiResponse; // Return the error response if validation fails
             }
-            var result = await _unitOfWork.UniversityRepository.UpdateAsync(id, universityDto, updaterId, cancellationToken);
+            var result = await unitOfWork.UniversityRepository.UpdateAsync(id, universityDto, updaterId, cancellationToken);
             if (!result)
             {
                 return ApiResponse.CreateNotFoundResponse("University does not exist or update failed.");
@@ -77,7 +68,7 @@ namespace WebApi.Services
 
         public async Task<bool> DeleteUniversityAsync(Guid id, CancellationToken cancellationToken = default)
         {
-            return await _unitOfWork.UniversityRepository.DeleteAsync(id, cancellationToken);
+            return await unitOfWork.UniversityRepository.DeleteAsync(id, cancellationToken);
         }
 
         private bool IsValidCreateUpdateUniversityDto(CreateUpdateUniversityDto universityDto, out ApiResponse apiResponse)

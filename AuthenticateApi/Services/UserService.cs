@@ -1,22 +1,13 @@
-﻿using AppCore.BaseModel;
+﻿using ApiAuthentication.Services.Interfaces;
+using AppCore.BaseModel;
 using AppCore.Dtos;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Repositories;
+using Repositories.Interfaces;
 using System.Security.Claims;
 using WebApi.Extension;
 
-namespace WebApi.Services
+namespace ApiAuthentication.Services
 {
-    public interface IUserService
-    {
-        Task<ApiResponse<UserDto>> GetById (Guid id);
-        Task<ApiResponse> Login(LoginDto loginDto, JwtOptions jwtOptions);
-        Task<ApiResponse> Register(RegisterDto registerDto);
-        Task<ApiResponse> InitTestUsers();
-        Task<ApiResponse> ValidateToken(JwtOptions jwtOptions);
-        Task<ApiResponse> KeepAlive(JwtOptions jwtOptions);
-    }
 
     public class UserService : BaseService, IUserService
     {
