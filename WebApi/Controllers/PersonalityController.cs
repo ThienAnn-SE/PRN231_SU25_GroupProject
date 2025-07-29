@@ -83,5 +83,17 @@ namespace WebApi.Controllers
             }
             return Ok(response);
         }
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] CreateUpdatePersonalityDto dto, CancellationToken cancellationToken)
+        {
+            var result = await _personalityService.CreateAsync(new PersonalityDto
+            {
+                Name = dto.Name,
+                Description = dto.Description,
+                PersonalityTypeId = dto.PersonalityTypeId
+            }, creatorId: null, cancellationToken);
+
+            return StatusCode((int)result.Status, result);
+        }
     }
 }

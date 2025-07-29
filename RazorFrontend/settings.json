@@ -4,7 +4,7 @@
     "LoginEndpoint": "gateway/user/login",
     "RegisterEndpoint": "gateway/user/register",
     "PersonalityListEndpoint": "gateway/personality",
-    "PersonalityTypeListEndpoint": "gateway/personality/types",
+    "PersonalityTypeListEndpoint": "gateway/personality/type",
     "PersonalityCreateEndpoint": "gateway/personality",
     // endpoint University
     "UniversityListEndpoint": "gateway/university",
