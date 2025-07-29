@@ -18,7 +18,6 @@ namespace WebApi.Controllers
             _testService = testService;
         }
 
-        [Authorize(Roles = Role.Admin)]
         [HttpGet()]
         public async Task<IActionResult> GetAllTests(CancellationToken cancellationToken = default)
         {
@@ -30,7 +29,6 @@ namespace WebApi.Controllers
             return Ok(response);
         }
 
-        [Authorize]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetTestById(Guid id, CancellationToken cancellationToken = default)
         {
@@ -42,7 +40,6 @@ namespace WebApi.Controllers
             return Ok(response);
         }
 
-        [Authorize(Roles = Role.Admin)]
         [HttpPost()]
         public async Task<IActionResult> CreateTest([FromBody] CreateTestDto testDto, CancellationToken cancellationToken = default)
         {
@@ -62,7 +59,6 @@ namespace WebApi.Controllers
             return Ok(response);
         }
 
-        [Authorize]
         [HttpGet("PersonalType/{personalTypeId}")]
         public async Task<IActionResult> GetByPersonalTypeId(Guid personalTypeId, CancellationToken cancellationToken = default)
         {
@@ -74,7 +70,6 @@ namespace WebApi.Controllers
             return Ok(response);
         }
 
-        [Authorize]
         [HttpGet("Random/{personalTypeId}")]
         public async Task<IActionResult> GetRandomTest(Guid personalTypeId, CancellationToken cancellationToken = default)
         {
