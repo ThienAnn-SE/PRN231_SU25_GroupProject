@@ -1,42 +1,28 @@
 {
-  "Logging": {
-    "LogLevel": {
-      "Default": "Information",
-      "Microsoft.AspNetCore": "Warning"
-    }
-  },
-  "AllowedHosts": "*",
-  "ConnectionStrings": {
-    "DefaultConnection": "Server=localhost;Database=PRN231_SU25_SPES;Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=True"
-  },
   "ApiSettings": {
     "BaseUrl": "http://localhost:5203/",
     "LoginEndpoint": "gateway/user/login",
     "RegisterEndpoint": "gateway/user/register",
     "PersonalityListEndpoint": "gateway/personality",
-    "PersonalityTypeListEndpoint": "gateway/personality/types",
+    "PersonalityTypeListEndpoint": "gateway/personality/type",
     "PersonalityCreateEndpoint": "gateway/personality",
-
     // endpoint University
     "UniversityListEndpoint": "gateway/university",
     "UniversityByIdEndpoint": "gateway/university/{0}",
     "UniversityCreateEndpoint": "gateway/university",
     "UniversityUpdateEndpoint": "gateway/university/{0}",
     "UniversityDeleteEndpoint": "gateway/university/{0}",
-
     // endpoint Major
     "MajorListEndpoint": "gateway/major",
     "MajorGetByIdEndpoint": "gateway/major/{0}",
     "MajorCreateEndpoint": "gateway/major",
     "MajorUpdateEndpoint": "gateway/major/{0}",
     "MajorDeleteEndpoint": "gateway/major/{0}",
-
     "UserProfileListEndpoint": "gateway/userprofile",
     "UserProfileByIdEndpoint": "gateway/userprofile/{0}",
     "UserProfileCreateEndpoint": "gateway/userprofile",
     "UserProfileUpdateEndpoint": "gateway/userprofile/{0}",
-
     "MBTITestId": "REPLACE_WITH_TEST_GUID",
-    "TestByIdEndpoint": "api/test/{0}"
+    "TestByIdEndpoint": "gateway/test/{0}"
   }
-}
+} 

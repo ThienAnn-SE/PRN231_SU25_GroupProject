@@ -83,7 +83,8 @@ namespace WebApi.Controllers
             if (result.Status == System.Net.HttpStatusCode.Unauthorized)
             {
                 return Unauthorized(result);
-            }else if (result.Status == System.Net.HttpStatusCode.NotFound)
+            }
+            else if (result.Status == System.Net.HttpStatusCode.NotFound)
             {
                 NotFound(result);
             }

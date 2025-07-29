@@ -1,0 +1,68 @@
+﻿@* @page
+@model RazorFrontend.Pages.Universities.DetailModel
+@{
+} *@
+
+@page "{id:guid}"
+@model DetailModel
+@{
+    ViewData["Title"] = "University Details";
+}
+
+<h2>@Model.University?.Name</h2>
+
+@if (Model.ErrorMessage != null)
+{
+    <div class="alert alert-danger">@Model.ErrorMessage</div>
+}
+else if (Model.University != null)
+{
+    <dl class="row">
+        <dt class="col-sm-3">Location</dt>
+        <dd class="col-sm-9">@Model.University.Location</dd>
+
+        <dt class="col-sm-3">Phone</dt>
+        <dd class="col-sm-9">@Model.University.PhoneNumber</dd>
+
+        <dt class="col-sm-3">Email</dt>
+        <dd class="col-sm-9">@Model.University.Email</dd>
+
+        <dt class="col-sm-3">Website</dt>
+        <dd class="col-sm-9">
+            <a href="@Model.University.Website" target="_blank">@Model.University.Website</a>
+        </dd>
+
+        <dt class="col-sm-3">Description</dt>
+        <dd class="col-sm-9">@Model.University.Description</dd>
+    </dl>
+
+    <h4 class="mt-4">Majors</h4>
+    @if (Model.University.Majors.Any())
+    {
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Description</th>
+                    @* <th>Required Skills</th> *@
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var major in Model.University.Majors)
+                {
+                    <tr>
+                        <td>@major.Name</td>
+                        <td>@major.Description</td>
+                        @* <td>@major.RequiredSkills</td> *@
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <p>This university has no majors listed.</p>
+    }
+    <a asp-page="Index" class="btn btn-secondary ms-2">Back</a>
+}
+

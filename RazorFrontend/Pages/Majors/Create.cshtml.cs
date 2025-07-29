@@ -1,3 +1,4 @@
+using AppCore.BaseModel;
 using AppCore.Dtos;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -40,7 +41,7 @@ namespace RazorFrontend.Pages.Majors
 
             try
             {
-                var client = _factory.CreateClient();
+                var client = _factory.CreateClient("ApiClient");
                 var endpoint = _config["ApiSettings:MajorCreateEndpoint"];
                 var response = await client.PostAsJsonAsync(endpoint, Input);
 
@@ -64,14 +65,22 @@ namespace RazorFrontend.Pages.Majors
         {
             try
             {
-                var client = _factory.CreateClient();
-                var endpoint = _config["ApiSettings:UniversityListEndpoint"] ?? "api/university";
+                var client = _factory.CreateClient("ApiClient");
+                var endpoint = _config["ApiSettings:UniversityListEndpoint"];
                 var response = await client.GetAsync(endpoint);
 
                 if (response.IsSuccessStatusCode)
                 {
-                    var data = await response.Content.ReadFromJsonAsync<List<UniversityDto>>();
-                    if (data != null) UniversityList = data;
+                    var json = await response.Content.ReadAsStringAsync();
+                    var apiResponse = System.Text.Json.JsonSerializer.Deserialize<ApiResponses<UniversityDto>>(json, new System.Text.Json.JsonSerializerOptions
+                    {
+                        PropertyNameCaseInsensitive = true
+                    });
+
+                    if (apiResponse?.Success == true && apiResponse.Data != null)
+                    {
+                        UniversityList = apiResponse.Data;
+                    }
                 }
             }
             catch

@@ -1,9 +1,9 @@
-using System.Text.Json;
-using System.Net.Http;
-using Microsoft.AspNetCore.Mvc.RazorPages;
+﻿using AppCore.BaseModel;
 using AppCore.Dtos;
-using AppCore.BaseModel;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Configuration;
+using System.Net.Http;
+using System.Text.Json;
 
 namespace RazorFrontend.Pages.Personalities
 {
@@ -25,8 +25,7 @@ namespace RazorFrontend.Pages.Personalities
         {
             try
             {
-                string endpoint = _config["ApiSettings:PersonalityListEndpoint"] ?? "api/personality";
-
+                var endpoint = _config["ApiSettings:PersonalityListEndpoint"] ?? "api/personality";
                 var response = await _client.GetAsync(endpoint);
 
                 if (response.IsSuccessStatusCode)
@@ -53,7 +52,7 @@ namespace RazorFrontend.Pages.Personalities
             }
             catch (Exception ex)
             {
-                ErrorMessage = $"Error retrieving data: {ex.Message}";
+                ErrorMessage = $"Error retrieving personalities: {ex.Message}";
             }
         }
     }

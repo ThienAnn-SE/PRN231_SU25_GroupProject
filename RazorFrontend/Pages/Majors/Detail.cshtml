@@ -1,0 +1,51 @@
+﻿@* @page
+@model RazorFrontend.Pages.Majors.DetailModel
+@{
+} *@
+
+@page "{id:guid}"
+@model DetailModel
+@{
+    ViewData["Title"] = "Major Details";
+}
+
+<h2>@Model.Major?.Name</h2>
+
+@if (Model.ErrorMessage != null)
+{
+    <div class="alert alert-danger">@Model.ErrorMessage</div>
+}
+else if (Model.Major != null)
+{
+    <div class="mb-3">
+        <strong>Description:</strong>
+        <p>@Model.Major.Description</p>
+    </div>
+    <div class="mb-3">
+        <strong>Required Skills:</strong>
+        <p>@Model.Major.RequiredSkills</p>
+    </div>
+    <div class="mb-3">
+        <strong>University:</strong>
+        <p>@Model.GetUniversityName(Model.Major.UniversityId)</p>
+    </div>
+
+    <div class="mb-3">
+        <strong>Related Personalities:</strong>
+        @if (Model.Major.Personalities.Any())
+        {
+            <ul>
+                @foreach (var p in Model.Major.Personalities)
+                {
+                    <li><strong>@p.Name</strong>: @p.Description</li>
+                }
+            </ul>
+        }
+        else
+        {
+            <p>No personalities assigned.</p>
+        }
+    </div>
+    <a asp-page="Index" class="btn btn-secondary ms-2">Back</a>
+}
+

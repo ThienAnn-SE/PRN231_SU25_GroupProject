@@ -38,7 +38,7 @@ namespace ApiService.Controllers
             var university = await _universityService.GetUniversityByIdAsync(id, cancellationToken);
             if (university == null)
             {
-                return NotFound(ApiResponse.CreateNotFoundResponse("No university existed with given ID")); 
+                return NotFound(ApiResponse.CreateNotFoundResponse("No university existed with given ID"));
             }
             return Ok(university);
         }
@@ -79,17 +79,17 @@ namespace ApiService.Controllers
             return Ok(result);
         }
 
-        //[HttpDelete("{id}")]
-        //[ProducesResponseType(204)]
-        //[ProducesResponseType(404)]
-        //public async Task<IActionResult> DeleteUniversity(Guid id, CancellationToken cancellationToken)
-        //{
-        //    var success = await _universityService.DeleteUniversityAsync(id, cancellationToken);
-        //    if (!success)
-        //    {
-        //        return NotFound(); 
-        //    }
-        //    return NoContent(); 
-        //}
+        [HttpDelete("{id}")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(404)]
+        public async Task<IActionResult> DeleteUniversity(Guid id, CancellationToken cancellationToken)
+        {
+            var success = await _universityService.DeleteUniversityAsync(id, cancellationToken);
+            if (!success)
+            {
+                return NotFound();
+            }
+            return NoContent();
+        }
     }
 }

@@ -22,8 +22,8 @@
                         <dt class="col-sm-4">Name</dt>
                         <dd class="col-sm-8">@Model.Major?.Name</dd>
 
-                        <dt class="col-sm-4">University ID</dt>
-                        <dd class="col-sm-8">@Model.Major?.UniversityId</dd>
+                        <dt class="col-sm-4">University</dt>
+                        <dd class="col-sm-8">@Model.GetUniversityName(Model.Major?.UniversityId)</dd>
 
                         <dt class="col-sm-4">Description</dt>
                         <dd class="col-sm-8">@Model.Major?.Description</dd>
