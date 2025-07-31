@@ -18,8 +18,10 @@
                 <tr>
                     <th>Name</th>
                     <th>Location</th>
+                    <th>Phone</th>
                     <th>Email</th>
                     <th>Website</th>
+                    <th>Description</th>
                     <th></th>
                 </tr>
             </thead>
@@ -29,9 +31,12 @@
                     <tr>
                         <td>@university.Name</td>
                         <td>@university.Location</td>
+                        <td>@university.PhoneNumber</td>
                         <td>@university.Email</td>
                         <td><a href="@university.Website" target="_blank">@university.Website</a></td>
+                        <td>@university.Description</td>
                         <td class="text-end">
+                            <a class="btn btn-sm btn-outline-primary" asp-page="Detail" asp-route-id="@university.Id">✏🔍 Detail</a>
                             <a class="btn btn-sm btn-outline-primary" asp-page="Edit" asp-route-id="@university.Id">✏️ Edit</a>
                             <a class="btn btn-sm btn-outline-danger ms-2" asp-page="Delete" asp-route-id="@university.Id">🗑️ Delete</a>
                         </td>

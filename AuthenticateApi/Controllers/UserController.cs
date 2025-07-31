@@ -1,9 +1,9 @@
-﻿using AppCore.BaseModel;
+﻿using ApiAuthentication.Services.Interfaces;
+using AppCore.BaseModel;
 using AppCore.Dtos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using WebApi.Services;
 
 
 namespace WebApi.Controllers
@@ -83,7 +83,8 @@ namespace WebApi.Controllers
             if (result.Status == System.Net.HttpStatusCode.Unauthorized)
             {
                 return Unauthorized(result);
-            }else if (result.Status == System.Net.HttpStatusCode.NotFound)
+            }
+            else if (result.Status == System.Net.HttpStatusCode.NotFound)
             {
                 NotFound(result);
             }

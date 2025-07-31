@@ -29,6 +29,7 @@
             <thead class="table-light">
                 <tr>
                     <th>Name</th>
+                    <th>Description</th>
                     <th>University</th>
                     <th>Required Skills</th>
                     <th></th>
@@ -39,9 +40,11 @@
                 {
                     <tr>
                         <td>@major.Name</td>
+                        <td>@major.Description</td>
                         <td>@GetUniversityName(major.UniversityId)</td>
                         <td>@major.RequiredSkills</td>
                         <td class="text-end">
+                            <a class="btn btn-sm btn-primary" asp-page="Detail" asp-route-id="@major.Id">Detail</a>
                             <a class="btn btn-sm btn-primary" asp-page="Edit" asp-route-id="@major.Id">Edit</a>
                             <a class="btn btn-sm btn-danger ms-2" asp-page="Delete" asp-route-id="@major.Id">Delete</a>
                         </td>

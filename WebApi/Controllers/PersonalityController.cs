@@ -1,10 +1,10 @@
-﻿using AppCore.BaseModel;
+﻿using ApiService.Services.Interfaces;
+using AppCore.BaseModel;
 using AppCore.Dtos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using WebApi.Services;
 
-namespace WebApi.Controllers
+namespace ApiService.Controllers
 {
     [AllowAnonymous]
     [Route("api/[controller]")]
@@ -82,6 +82,18 @@ namespace WebApi.Controllers
                 ));
             }
             return Ok(response);
+        }
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] CreateUpdatePersonalityDto dto, CancellationToken cancellationToken)
+        {
+            var result = await _personalityService.CreateAsync(new PersonalityDto
+            {
+                Name = dto.Name,
+                Description = dto.Description,
+                PersonalityTypeId = dto.PersonalityTypeId
+            }, creatorId: null, cancellationToken);
+
+            return StatusCode((int)result.Status, result);
         }
     }
 }

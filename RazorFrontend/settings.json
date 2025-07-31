@@ -4,13 +4,15 @@
     "LoginEndpoint": "gateway/user/login",
     "RegisterEndpoint": "gateway/user/register",
     "PersonalityListEndpoint": "gateway/personality",
-    "PersonalityTypeListEndpoint": "gateway/personality/types",
+    "PersonalityTypeListEndpoint": "gateway/personality/type",
     "PersonalityCreateEndpoint": "gateway/personality",
+    // endpoint University
     "UniversityListEndpoint": "gateway/university",
     "UniversityByIdEndpoint": "gateway/university/{0}",
     "UniversityCreateEndpoint": "gateway/university",
     "UniversityUpdateEndpoint": "gateway/university/{0}",
     "UniversityDeleteEndpoint": "gateway/university/{0}",
+    // endpoint Major
     "MajorListEndpoint": "gateway/major",
     "MajorGetByIdEndpoint": "gateway/major/{0}",
     "MajorCreateEndpoint": "gateway/major",

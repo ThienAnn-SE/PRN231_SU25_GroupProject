@@ -3,22 +3,11 @@ using AppCore.Dtos;
 using AppCore.Entities;
 using Microsoft.EntityFrameworkCore;
 using Repositories.Extensions;
+using Repositories.Interfaces;
 using System.Linq.Expressions;
 
 namespace Repositories
 {
-    public interface IUserRepository
-    {
-        Task<UserDto?> AuthenticateAsync(LoginDto loginDto, CancellationToken cancellationToken = default);
-        Task<bool> RegisterAsync(RegisterDto registerDto);
-        Task<bool> IsUserExistsAsync(string username);
-        Task<UserDto?> GetByUsernameAsync(string username, CancellationToken cancellationToken = default);
-        Task<UserDto?> GetByEmailAsync(string email, CancellationToken cancellationToken = default);
-        Task<UserDto?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
-        Task<List<UserDto>> GetAllAsync(CancellationToken cancellationToken = default);
-        Task<bool> InitTestUser();
-    }
-
     public class UserRepository : IUserRepository
     {
         private const int MaxFailedAccessCount = 5;

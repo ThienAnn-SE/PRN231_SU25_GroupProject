@@ -6,42 +6,43 @@ using Microsoft.Extensions.Configuration;
 using System.Net.Http.Json;
 using System.Text.Json;
 
-
 namespace RazorFrontend.Pages.Tests
 {
     public class TakeModel : PageModel
     {
         private readonly IHttpClientFactory _clientFactory;
-        private readonly IConfiguration _config;
 
-        public TakeModel(IHttpClientFactory clientFactory, IConfiguration config)
+        public TakeModel(IHttpClientFactory clientFactory)
         {
             _clientFactory = clientFactory;
-            _config = config;
         }
 
         public List<QuestionDto> Questions { get; set; } = new();
         public string? ErrorMessage { get; set; }
 
         [BindProperty]
-        public List<int> Answers { get; set; } = new();
+        public List<Guid> AnswerIds { get; set; } = new();
+
+        public Guid TestId { get; set; }
 
         public async Task<IActionResult> OnGetAsync()
         {
             try
             {
                 var client = _clientFactory.CreateClient("ApiClient");
-                var testEndpoint = _config["ApiSettings:MBTITestId"]; // Get test by ID
 
-                var response = await client.GetFromJsonAsync<ApiResponse<TestDto>>($"api/test/{testEndpoint}");
+                // Call API to get all tests
+                var response = await client.GetFromJsonAsync<ApiResponses<TestDto>>("gateway/test");
 
-                if (response?.Success == true && response.Data != null)
+                if (response?.Success == true && response.Data != null && response.Data.Any())
                 {
-                    Questions = response.Data.Questions;
+                    var firstTest = response.Data.First();
+                    TestId = firstTest.Id;
+                    Questions = firstTest.Questions;
                     return Page();
                 }
 
-                ErrorMessage = response?.Message ?? "Failed to load test.";
+                ErrorMessage = "Failed to load test list.";
                 return Page();
             }
             catch (Exception ex)
@@ -53,18 +54,35 @@ namespace RazorFrontend.Pages.Tests
 
         public async Task<IActionResult> OnPostAsync()
         {
-            if (Answers == null || Answers.Count != 50)
+            if (AnswerIds == null || AnswerIds.Count != 50)
             {
                 ErrorMessage = "You must answer all 50 questions.";
-                return await OnGetAsync(); // Reload the test
+                return await OnGetAsync();
             }
 
             try
             {
-                // Gửi danh sách câu trả lời sang backend để đánh giá
-                var result = WebApi.Extension.TestEvaluationExtensions.EvaluateMBTI(Answers);
-                TempData["MbtiResult"] = result;
-                return RedirectToPage("Result");
+                var client = _clientFactory.CreateClient("ApiClient");
+
+                // Get userId từ JWT hoặc session — tạm thời để Guid.Empty nếu chưa có auth
+                var submission = new TestSubmissionDto
+                {
+                    TestId = TestId,
+                    Date = DateTime.UtcNow,
+                    ExamineeId = Guid.Empty, // Cần sửa nếu đã có login
+                    Answers = AnswerIds
+                };
+
+                var response = await client.PostAsJsonAsync("gateway/testsubmission", submission);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    TempData["MbtiResult"] = "Submitted successfully.";
+                    return RedirectToPage("Result");
+                }
+
+                ErrorMessage = "Failed to submit test.";
+                return await OnGetAsync();
             }
             catch (Exception ex)
             {

@@ -27,7 +27,7 @@ namespace RazorFrontend.Pages.Universities
         {
             try
             {
-                string endpoint = _config["ApiSettings:UniversityListEndpoint"] ?? "api/university";
+                string endpoint = _config["ApiSettings:UniversityListEndpoint"] ?? "gateway/university";
 
                 var response = await _client.GetAsync(endpoint);
 

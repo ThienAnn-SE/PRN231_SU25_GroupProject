@@ -1,11 +1,11 @@
-﻿using AppCore.BaseModel;
+﻿using ApiService.Services.Interfaces;
+using AppCore.BaseModel;
 using AppCore.Dtos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WebApi.Extension;
-using WebApi.Services;
 
-namespace WebApi.Controllers
+namespace ApiService.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -36,7 +36,7 @@ namespace WebApi.Controllers
         {
             if (id == Guid.Empty)
             {
-                return BadRequest( ApiResponse.CreateBadRequestResponse("Test submission ID is required."));
+                return BadRequest(ApiResponse.CreateBadRequestResponse("Test submission ID is required."));
             }
             var response = await _testSubmissionService.GetByIdAsync(id, cancellationToken);
             if (response.Status == System.Net.HttpStatusCode.NotFound)

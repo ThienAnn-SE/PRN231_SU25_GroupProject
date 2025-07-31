@@ -22,7 +22,7 @@
         }
       ],
       "UpstreamPathTemplate": "/gateway/major/{id}",
-      "UpstreamHttpMethod": [ "GET" ]
+      "UpstreamHttpMethod": [ "GET", "PUT", "DELETE" ]
     },
     {
       "DownstreamPathTemplate": "/api/Major/Personality/{id}",

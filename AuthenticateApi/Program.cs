@@ -3,8 +3,9 @@ using AppCore.BaseModel;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
-using WebApi.Services;
 using WebApi.Middlewares;
+using ApiAuthentication.Services;
+using ApiAuthentication.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 

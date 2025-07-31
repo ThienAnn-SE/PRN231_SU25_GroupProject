@@ -1,3 +1,4 @@
+using AppCore.BaseModel;
 using AppCore.Dtos;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -53,40 +54,44 @@ namespace RazorFrontend.Pages.Universities
 
         public async Task<IActionResult> OnGetAsync()
         {
-            var client = _clientFactory.CreateClient();
-            var baseUrl = _config["ApiSettings:BaseUrl"];
-            var endpoint = $"{baseUrl}api/university/{Id}";
+            var client = _clientFactory.CreateClient("ApiClient");
+            var endpoint = string.Format(_config["ApiSettings:UniversityByIdEndpoint"], Id);
 
             try
             {
                 var response = await client.GetAsync(endpoint);
                 if (!response.IsSuccessStatusCode)
                 {
-                    ErrorMessage = "Unable to load university data.";
+                    ErrorMessage = $"Unable to load university data. Status: {response.StatusCode}";
                     return Page();
                 }
 
                 var json = await response.Content.ReadAsStringAsync();
-                var university = JsonSerializer.Deserialize<UniversityDto>(json, new JsonSerializerOptions
+                ErrorMessage = $"Debug - API Response: {json}";
+                
+                var apiResponse = JsonSerializer.Deserialize<ApiResponse<UniversityDto>>(json, new JsonSerializerOptions
                 {
                     PropertyNameCaseInsensitive = true
                 });
 
-                if (university == null)
+                if (apiResponse?.Success == true && apiResponse.Data != null)
                 {
-                    ErrorMessage = "University not found.";
-                    return Page();
+                    var university = apiResponse.Data;
+                    Input = new EditUniversityInput
+                    {
+                        Name = university.Name,
+                        Location = university.Location,
+                        PhoneNumber = university.PhoneNumber,
+                        Email = university.Email,
+                        Website = university.Website,
+                        Description = university.Description
+                    };
+                    ErrorMessage = null; // Clear debug message
                 }
-
-                Input = new EditUniversityInput
+                else
                 {
-                    Name = university.Name,
-                    Location = university.Location,
-                    PhoneNumber = university.PhoneNumber,
-                    Email = university.Email,
-                    Website = university.Website,
-                    Description = university.Description
-                };
+                    ErrorMessage = apiResponse?.Message ?? "University not found.";
+                }
             }
             catch (Exception ex)
             {
@@ -101,9 +106,8 @@ namespace RazorFrontend.Pages.Universities
             if (!ModelState.IsValid)
                 return Page();
 
-            var client = _clientFactory.CreateClient();
-            var baseUrl = _config["ApiSettings:BaseUrl"];
-            var endpoint = $"{baseUrl}api/university/{Id}";
+            var client = _clientFactory.CreateClient("ApiClient");
+            var endpoint = string.Format(_config["ApiSettings:UniversityUpdateEndpoint"], Id);
 
             var dto = new CreateUpdateUniversityDto
             {
@@ -115,11 +119,9 @@ namespace RazorFrontend.Pages.Universities
                 Description = Input.Description
             };
 
-            var content = new StringContent(JsonSerializer.Serialize(dto), Encoding.UTF8, "application/json");
-
             try
             {
-                var response = await client.PutAsync(endpoint, content);
+                var response = await client.PutAsJsonAsync(endpoint, dto);
                 if (response.IsSuccessStatusCode)
                 {
                     return RedirectToPage("Index");

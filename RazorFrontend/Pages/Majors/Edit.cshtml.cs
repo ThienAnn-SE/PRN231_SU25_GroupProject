@@ -1,3 +1,4 @@
+using AppCore.BaseModel;
 using AppCore.Dtos;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -31,8 +32,8 @@ namespace RazorFrontend.Pages.Majors
         {
             await LoadUniversities();
 
-            var client = _factory.CreateClient();
-            var endpoint = $"{_config["ApiSettings:MajorListEndpoint"]}/{Id}";
+            var client = _factory.CreateClient("ApiClient");
+            var endpoint = string.Format(_config["ApiSettings:MajorGetByIdEndpoint"], Id);
 
             var response = await client.GetAsync(endpoint);
             if (!response.IsSuccessStatusCode)
@@ -41,20 +42,27 @@ namespace RazorFrontend.Pages.Majors
                 return Page();
             }
 
-            var major = await response.Content.ReadFromJsonAsync<MajorDto>();
-            if (major is null)
+            var json = await response.Content.ReadAsStringAsync();
+            var apiResponse = System.Text.Json.JsonSerializer.Deserialize<ApiResponse<MajorDto>>(json, new System.Text.Json.JsonSerializerOptions
             {
-                ErrorMessage = "Unable to load major.";
-                return Page();
-            }
+                PropertyNameCaseInsensitive = true
+            });
 
-            Input = new CreateUpdateMajorDto
+            if (apiResponse?.Success == true && apiResponse.Data != null)
             {
-                Name = major.Name,
-                Description = major.Description,
-                RequiredSkills = major.RequiredSkills,
-                UniversityId = major.UniversityId
-            };
+                var major = apiResponse.Data;
+                Input = new CreateUpdateMajorDto
+                {
+                    Name = major.Name,
+                    Description = major.Description,
+                    RequiredSkills = major.RequiredSkills,
+                    UniversityId = major.UniversityId
+                };
+            }
+            else
+            {
+                ErrorMessage = apiResponse?.Message ?? "Unable to load major.";
+            }
 
             return Page();
         }
@@ -64,18 +72,26 @@ namespace RazorFrontend.Pages.Majors
             await LoadUniversities();
 
             if (!ModelState.IsValid)
+            {
+                var errors = string.Join(", ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage));
+                ErrorMessage = $"Model validation failed: {errors}";
                 return Page();
+            }
 
             try
             {
-                var client = _factory.CreateClient();
-                var endpoint = $"{_config["ApiSettings:MajorListEndpoint"]}/{Id}";
+                var client = _factory.CreateClient("ApiClient");
+                var endpoint = string.Format(_config["ApiSettings:MajorUpdateEndpoint"], Id);
+                
                 var result = await client.PutAsJsonAsync(endpoint, Input);
 
                 if (result.IsSuccessStatusCode)
+                {
                     return RedirectToPage("Index");
+                }
 
-                ErrorMessage = $"Update failed: {await result.Content.ReadAsStringAsync()}";
+                var errorContent = await result.Content.ReadAsStringAsync();
+                ErrorMessage = $"Update failed (Status: {result.StatusCode}): {errorContent}";
             }
             catch (Exception ex)
             {
@@ -87,14 +103,21 @@ namespace RazorFrontend.Pages.Majors
 
         private async Task LoadUniversities()
         {
-            var client = _factory.CreateClient();
+            var client = _factory.CreateClient("ApiClient");
             var endpoint = _config["ApiSettings:UniversityListEndpoint"];
             var response = await client.GetAsync(endpoint);
             if (response.IsSuccessStatusCode)
             {
-                var data = await response.Content.ReadFromJsonAsync<List<UniversityDto>>();
-                if (data != null)
-                    UniversityList = data;
+                var json = await response.Content.ReadAsStringAsync();
+                var apiResponse = System.Text.Json.JsonSerializer.Deserialize<ApiResponses<UniversityDto>>(json, new System.Text.Json.JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+
+                if (apiResponse?.Success == true && apiResponse.Data != null)
+                {
+                    UniversityList = apiResponse.Data;
+                }
             }
         }
     }

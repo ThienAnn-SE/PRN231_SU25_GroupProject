@@ -1,11 +1,11 @@
-﻿using AppCore.BaseModel;
+﻿using ApiService.Services.Interfaces;
+using AppCore.BaseModel;
 using AppCore.Dtos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WebApi.Extension;
-using WebApi.Services;
 
-namespace WebApi.Controllers
+namespace ApiService.Controllers
 {
     [Authorize]
     [Route("api/[controller]")]
@@ -78,7 +78,7 @@ namespace WebApi.Controllers
         {
             if (id == Guid.Empty || userProfileDto == null)
             {
-                return BadRequest( ApiResponse.CreateResponse(System.Net.HttpStatusCode.BadRequest, false, "User Profile ID and data are required."));
+                return BadRequest(ApiResponse.CreateResponse(System.Net.HttpStatusCode.BadRequest, false, "User Profile ID and data are required."));
             }
             userProfileDto.Id = id; // Ensure the ID in the DTO matches the route parameter
             var response = await _userProfileService.UpdateUserProfileAsync(userProfileDto, cancellationToken);

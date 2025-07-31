@@ -1,10 +1,10 @@
+using ApiService.Extension;
 using AppCore.BaseModel;
 using AppCore.Extensions;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Repositories.Extensions;
 using System.Text;
-using WebApi.Extension;
 using WebApi.Middlewares;
 var builder = WebApplication.CreateBuilder(args);
 

@@ -1,32 +1,17 @@
-﻿using AppCore.BaseModel;
+﻿using ApiService.Services.Interfaces;
+using AppCore.BaseModel;
 using AppCore.Dtos;
 using Microsoft.Extensions.Options;
-using Repositories;
+using Repositories.Interfaces;
 
-namespace WebApi.Services
+namespace ApiService.Services
 {
-    public interface IMajorService
+    public class MajorService : BaseService, IMajorService
     {
-        Task<ApiResponse> GetMajorByIdAsync(Guid id, CancellationToken cancellationToken = default);
-        Task<ApiResponse> GetAllMajorsAsync(CancellationToken cancellationToken = default);
-        Task<ApiResponse> GetMajorsByPersonalityIdAsync(Guid personalityId, CancellationToken cancellationToken = default);
-        Task<ApiResponse> CreateMajorAsync(CreateUpdateMajorDto majorDto, Guid? creatorId = null, CancellationToken cancellationToken = default);
-        Task<bool> UpdateMajorAsync(Guid id, CreateUpdateMajorDto majorDto, Guid? updaterId = null, CancellationToken cancellationToken = default);
-        Task<bool> DeleteMajorAsync(Guid id, CancellationToken cancellationToken = default);
-        Task<ApiResponse> AddNewPersonalityToMajorAsync(MajorPersonalityDto majorPersonalityDto, CancellationToken cancellationToken = default);
-        Task<ApiResponse> DeletePersonalityFromMajorAsync(MajorPersonalityDto majorPersonalityDto, CancellationToken cancellationToken = default);
-        Task<ApiResponse> GetRecommendMajorsAsync(Guid personalityId, CancellationToken cancellationToken = default);
-
-    }
-
-    public class MajorService : IMajorService
-    {
-        private readonly IUnitOfWork _unitOfWork;
         private readonly int _recommendLimit;
 
-        public MajorService(IUnitOfWork unitOfWork, IOptions<RecommendMajorCountOptions> options)
+        public MajorService(IUnitOfWork unitOfWork, IOptions<RecommendMajorCountOptions> options) : base(unitOfWork)
         {
-            _unitOfWork = unitOfWork;
             _recommendLimit = options.Value.Limit;
         }
 
@@ -36,7 +21,7 @@ namespace WebApi.Services
             {
                 return ApiResponse.CreateBadRequestResponse("Major ID is required.");
             }
-            var major = await _unitOfWork.MajorRepository.GetByIdAsync(id, cancellationToken);
+            var major = await unitOfWork.MajorRepository.GetByIdAsync(id, cancellationToken);
             if (major == null)
             {
                 return ApiResponse.CreateNotFoundResponse("No major found with the given ID.");
@@ -46,7 +31,7 @@ namespace WebApi.Services
 
         public async Task<ApiResponse> GetAllMajorsAsync(CancellationToken cancellationToken = default)
         {
-            var majors = await _unitOfWork.MajorRepository.GetAll(cancellationToken);
+            var majors = await unitOfWork.MajorRepository.GetAll(cancellationToken);
             if (majors == null || !majors.Any())
             {
                 return ApiResponse.CreateNotFoundResponse("No majors found.");
@@ -60,7 +45,7 @@ namespace WebApi.Services
             {
                 return ApiResponse.CreateBadRequestResponse("Major name and description are required.");
             }
-            var university = await _unitOfWork.UniversityRepository.GetByIdAsync(majorDto.UniversityId, cancellationToken);
+            var university = await unitOfWork.UniversityRepository.GetByIdAsync(majorDto.UniversityId, cancellationToken);
             if (university == null)
             {
                 return ApiResponse.CreateNotFoundResponse("University not found for the given ID.");
@@ -70,7 +55,7 @@ namespace WebApi.Services
             {
                 return ApiResponse.CreateBadRequestResponse("Existing Majors");
             }
-            var success = await _unitOfWork.MajorRepository.CreateAsync(majorDto, creatorId, cancellationToken);
+            var success = await unitOfWork.MajorRepository.CreateAsync(majorDto, creatorId, cancellationToken);
             if (!success)
             {
                 return ApiResponse.CreateBadRequestResponse("Major with this name might already exist or name is invalid.");
@@ -84,12 +69,12 @@ namespace WebApi.Services
             {
                 return false;
             }
-            return await _unitOfWork.MajorRepository.UpdateAsync(id, majorDto, updaterId, cancellationToken);
+            return await unitOfWork.MajorRepository.UpdateAsync(id, majorDto, updaterId, cancellationToken);
         }
 
         public async Task<bool> DeleteMajorAsync(Guid id, CancellationToken cancellationToken = default)
         {
-            return await _unitOfWork.MajorRepository.DeleteAsync(id, cancellationToken);
+            return await unitOfWork.MajorRepository.DeleteAsync(id, cancellationToken);
         }
 
         public async Task<ApiResponse> AddNewPersonalityToMajorAsync(MajorPersonalityDto majorPersonalityDto, CancellationToken cancellationToken = default)
@@ -111,20 +96,20 @@ namespace WebApi.Services
                 return ApiResponse.CreateBadRequestResponse("Duplicate personality IDs are not allowed.");
             }
 
-            var major = await _unitOfWork.MajorRepository.GetByIdAsync(majorPersonalityDto.MajorId, cancellationToken);
+            var major = await unitOfWork.MajorRepository.GetByIdAsync(majorPersonalityDto.MajorId, cancellationToken);
             if (major == null)
             {
                 return ApiResponse.CreateNotFoundResponse("Major not found.");
             }
             foreach (var personalityId in majorPersonalityDto.PersonalityIds)
             {
-                var personality = await _unitOfWork.PersonalityRepository.GetByIdAsync(personalityId, cancellationToken);
+                var personality = await unitOfWork.PersonalityRepository.GetByIdAsync(personalityId, cancellationToken);
                 if (personality == null)
                 {
                     return ApiResponse.CreateNotFoundResponse($"Personality with ID {personalityId} not found.");
                 }
             }
-            var success = await _unitOfWork.MajorRepository.AddNewPersonalityToMajor(majorPersonalityDto);
+            var success = await unitOfWork.MajorRepository.AddNewPersonalityToMajor(majorPersonalityDto);
             if (!success)
             {
                 return ApiResponse.CreateBadRequestResponse("Failed to add personality to major. Personality might already exist in this major.");
@@ -151,14 +136,14 @@ namespace WebApi.Services
                 return ApiResponse.CreateBadRequestResponse("Duplicate personality IDs are not allowed.");
             }
 
-            var major = await _unitOfWork.MajorRepository.GetByIdAsync(majorPersonalityDto.MajorId, cancellationToken);
+            var major = await unitOfWork.MajorRepository.GetByIdAsync(majorPersonalityDto.MajorId, cancellationToken);
             if (major == null)
             {
                 return ApiResponse.CreateNotFoundResponse("Major not found.");
             }
             foreach (var personalityId in majorPersonalityDto.PersonalityIds)
             {
-                var personality = await _unitOfWork.PersonalityRepository.GetByIdAsync(personalityId, cancellationToken);
+                var personality = await unitOfWork.PersonalityRepository.GetByIdAsync(personalityId, cancellationToken);
                 if (personality == null)
                 {
                     return ApiResponse.CreateNotFoundResponse($"Personality with ID {personalityId} not found.");
@@ -169,7 +154,7 @@ namespace WebApi.Services
                 return ApiResponse.CreateNotFoundResponse("No matching personalities found in the major.");
             }
 
-            var success = await _unitOfWork.MajorRepository.DeletePersonalityFromMajor(majorPersonalityDto);
+            var success = await unitOfWork.MajorRepository.DeletePersonalityFromMajor(majorPersonalityDto);
 
             if (!success)
             {
@@ -184,12 +169,12 @@ namespace WebApi.Services
             {
                 return ApiResponse.CreateBadRequestResponse("Personality ID is required.");
             }
-            var personality = await _unitOfWork.PersonalityRepository.GetByIdAsync(personalityId, cancellationToken);
+            var personality = await unitOfWork.PersonalityRepository.GetByIdAsync(personalityId, cancellationToken);
             if (personality == null)
             {
                 return ApiResponse.CreateNotFoundResponse("No personality found with the given ID.");
             }
-            var majors = await _unitOfWork.MajorRepository.GetMajorsByPersonalityIdAsync(personalityId, cancellationToken);
+            var majors = await unitOfWork.MajorRepository.GetMajorsByPersonalityIdAsync(personalityId, cancellationToken);
             if (majors == null || !majors.Any())
             {
                 return ApiResponse.CreateNotFoundResponse("No majors found for the given personality ID.");
@@ -203,12 +188,12 @@ namespace WebApi.Services
             {
                 return ApiResponse.CreateBadRequestResponse("Personality ID is required.");
             }
-            var personality = await _unitOfWork.PersonalityRepository.GetByIdAsync(personalityId, cancellationToken);
+            var personality = await unitOfWork.PersonalityRepository.GetByIdAsync(personalityId, cancellationToken);
             if (personality == null)
             {
                 return ApiResponse.CreateNotFoundResponse("No personality found with the given ID.");
             }
-            var majors = await _unitOfWork.MajorRepository.GetMajorsByPersonalityIdAsync(personalityId, cancellationToken);
+            var majors = await  unitOfWork.MajorRepository.GetMajorsByPersonalityIdAsync(personalityId, cancellationToken);
             if (majors == null || majors.Count == 0)
             {
                 return ApiResponse.CreateNotFoundResponse("No majors found for the given personality ID.");

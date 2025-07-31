@@ -1,21 +1,9 @@
-﻿using AppCore.BaseModel;
+using ApiService.Services.Interfaces;
+using AppCore.BaseModel;
 using AppCore.Dtos;
-using Repositories;
+using Repositories.Interfaces;
 
-namespace WebApi.Services
-{
-    public interface IPersonalityService
-    {
-        Task<ApiResponses<PersonalityDetailDto>> GetAll(CancellationToken cancellationToken = default);
-        Task<ApiResponses<PersonalityTypeDto>> GetTypeAll(CancellationToken cancellationToken = default);
-        Task<ApiResponse<PersonalityDto>> GetById(Guid id, CancellationToken cancellationToken = default);
-        Task<ApiResponse<PersonalityTypeDto>> GetTypeById(Guid id, CancellationToken cancellationToken = default);
-
-        //Task<ApiResponse> CreateAsync(PersonalityDto personalityDto, Guid? creatorId = null, CancellationToken cancellationToken = default);
-        //Task<ApiResponse> UpdateAsync(PersonalityDto personalityDto, Guid? updaterId = null, CancellationToken cancellationToken = default);
-        //Task<ApiResponse> DeleteAsync(Guid id, CancellationToken cancellationToken = default);
-    }
-
+namespace ApiService.Services
     public class PersonalityService : BaseService, IPersonalityService
     {
         public PersonalityService(IUnitOfWork unitOfWork) : base(unitOfWork)
@@ -94,6 +82,35 @@ namespace WebApi.Services
                 "Personality type retrieved successfully.",
                 personalityType
             );
+        }
+
+        public async Task<ApiResponse> CreateAsync(PersonalityDto personalityDto, Guid? creatorId = null, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                var success = await unitOfWork.PersonalityRepository.CreateAsync(personalityDto, creatorId, cancellationToken);
+                if (!success)
+                {
+                    return ApiResponse.CreateErrorResponse(HttpStatusCode.InternalServerError, "Failed to create personality.");
+                }
+
+                return ApiResponse.CreateResponse(HttpStatusCode.Created, true, "Personality created successfully.");
+            }
+            catch (Exception ex)
+            {
+                return ApiResponse.CreateErrorResponse(HttpStatusCode.InternalServerError, ex);
+            }
+        }
+
+
+        public Task<ApiResponse> UpdateAsync(PersonalityDto personalityDto, Guid? updaterId = null, CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<ApiResponse> DeleteAsync(Guid id, CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
         }
     }
 }
