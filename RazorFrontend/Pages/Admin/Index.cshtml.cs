@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using AppCore.Dtos;
@@ -5,6 +6,7 @@ using System.Net.Http.Json;
 
 namespace RazorFrontend.Pages.Admin
 {
+    [Authorize(Roles = "Admin")]
     public class IndexModel : PageModel
     {
         private readonly IHttpClientFactory _factory;
