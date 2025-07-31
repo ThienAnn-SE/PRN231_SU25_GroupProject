@@ -138,17 +138,3 @@
         </div>
     </div>
 </div>
-
-@section Scripts {
-    <script>
-        // Initialize Bootstrap tabs
-        var triggerTabList = [].slice.call(document.querySelectorAll('#adminTabs button'))
-        triggerTabList.forEach(function (triggerEl) {
-            var tabTrigger = new bootstrap.Tab(triggerEl)
-            triggerEl.addEventListener('click', function (event) {
-                event.preventDefault()
-                tabTrigger.show()
-            })
-        })
-    </script>
-}
