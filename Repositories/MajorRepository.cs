@@ -22,6 +22,7 @@ namespace Repositories
         Task<bool> AddNewPersonalityToMajor(MajorPersonalityDto majorPersonalityDto, Guid? updaterId = null, CancellationToken cancellationToken = default);
 
         Task<bool> DeletePersonalityFromMajor(MajorPersonalityDto majorPersonalityDto, Guid? updaterId = null, CancellationToken cancellationToken = default);
+        Task<List<MajorWithUniversityDto>> GetAllWithUniversityAsync(CancellationToken cancellationToken = default);
     }
 
     public class MajorRepository : IMajorRepository
@@ -240,6 +241,26 @@ namespace Repositories
                     Id = mp.Personality.Id,
                     Name = mp.Personality.Name,
                     Description = mp.Personality.Description
+                }).ToList()
+            }).ToList();
+        }
+        public async Task<List<MajorWithUniversityDto>> GetAllWithUniversityAsync(CancellationToken cancellationToken = default)
+        {
+            var majors = await _majorRepository.GetAllAsync(cancellationToken: cancellationToken);
+
+            return majors.Select(m => new MajorWithUniversityDto
+            {
+                Id = m.Id,
+                Name = m.Name,
+                Description = m.Description,
+                RequiredSkills = m.RequiredSkills,
+                UniversityId = m.UniversityId,
+                UniversityName = m.University?.Name ?? string.Empty,
+                Personalities = m.Personalities.Select(p => new PersonalityDto
+                {
+                    Id = p.Personality.Id,
+                    Name = p.Personality.Name,
+                    Description = p.Personality.Description
                 }).ToList()
             }).ToList();
         }

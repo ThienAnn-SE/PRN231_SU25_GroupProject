@@ -39,7 +39,7 @@ namespace Repositories
             DbContext dbContext,
             IDbTransaction transaction)
         {
-            _personalityRepository = new CrudRepository<Personality>(dbContext, transaction);
+            _personalityRepository = new PersonalityWithIncludesRepository(dbContext, transaction);
             _personalityTypeRepository = new CrudRepository<PersonalityType>(dbContext, transaction);
         }
 
@@ -60,6 +60,8 @@ namespace Repositories
                 x => x.DeletedAt != default(DateTime) // Assuming DeletedAt is a DateTime field indicating soft deletion
             };
             var personalities = await _personalityRepository.FindAsync(filter, cancellationToken: cancellationToken);
+
+            // PersonalityType.* sẽ không còn null
             return personalities.Select(p => new PersonalityDetailDto
             {
                 Id = p.Id,

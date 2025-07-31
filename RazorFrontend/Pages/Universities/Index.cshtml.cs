@@ -1,3 +1,4 @@
+using AppCore.BaseModel;
 using AppCore.Dtos;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Configuration;
@@ -29,10 +30,18 @@ namespace RazorFrontend.Pages.Universities
             if (response.IsSuccessStatusCode)
             {
                 var json = await response.Content.ReadAsStringAsync();
-                Universities = JsonSerializer.Deserialize<List<UniversityDto>>(json, new JsonSerializerOptions
+
+                var result = JsonSerializer.Deserialize<ApiResponses<UniversityDto>>(json, new JsonSerializerOptions
                 {
                     PropertyNameCaseInsensitive = true
-                }) ?? new List<UniversityDto>();
+                });
+
+                Universities = result?.Data ?? new List<UniversityDto>();
+            }
+            else
+            {
+                // optional: log error or show message
+                Universities = new List<UniversityDto>();
             }
         }
     }

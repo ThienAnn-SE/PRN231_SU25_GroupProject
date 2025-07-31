@@ -1,20 +1,20 @@
 ﻿@page
 @model RazorFrontend.Pages.Tests.TakeModel
 @{
-    ViewData["Title"] = "Take MBTI Test";
+    ViewData["Title"] = "Take Personality Test";
 }
 
 <div class="container mt-5">
-    <h2 class="text-center mb-4">🧠 MBTI Test</h2>
+    <h2 class="text-center mb-4">🧠 Personality Test</h2>
 
     @if (!string.IsNullOrEmpty(Model.ErrorMessage))
     {
         <div class="alert alert-danger">@Model.ErrorMessage</div>
     }
 
-    <form method="post" id="testForm">
+    <form method="post">
         <div class="mb-3">
-            <p><strong>Answer all 50 questions by choosing the option that suits you best.</strong></p>
+            <p><strong>Please answer all questions by choosing the option that suits you best.</strong></p>
         </div>
 
         @for (int i = 0; i < Model.Questions.Count; i++)
@@ -28,7 +28,7 @@
                         <input class="form-check-input"
                                type="radio"
                                name="Answers[@i]"
-                               value="@j"
+                               value="@question.Answers[j].Id"
                                required />
                         <label class="form-check-label">@question.Answers[j].Text</label>
                     </div>

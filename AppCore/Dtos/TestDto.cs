@@ -16,6 +16,8 @@ namespace AppCore.Dtos
         /// List of questions in the test
         /// </summary>
         public List<QuestionDto> Questions { get; set; } = new List<QuestionDto>();
+        public PersonalityTypeDto? PersonalityType { get; set; }
+
         /// <summary>
         /// Identifier of the personality type associated with the test
         /// </summary>

@@ -17,6 +17,7 @@ namespace Repositories
         Task<bool> UpdateAsync(TestSubmissionDto testSubmissionDto, Guid? updaterId = null, CancellationToken cancellationToken = default);
 
         Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken = default);
+        Task<TestSubmissionDto?> GetLatestByExamineeAndTestAsync(Guid examineeId, Guid testId, CancellationToken cancellationToken = default);
     }
 
     public class TestSubmissionRepository : ITestSubmissionRepository
@@ -146,6 +147,31 @@ namespace Repositories
             }).ToList();
 
             return await _testSubmissionRepository.SaveAsync(existingSubmission, updaterId, cancellationToken);
+        }
+        public async Task<TestSubmissionDto?> GetLatestByExamineeAndTestAsync(Guid examineeId, Guid testId, CancellationToken cancellationToken = default)
+        {
+            var allSubmissions = await _testSubmissionRepository.GetAllAsync(cancellationToken);
+            var submissions = allSubmissions
+                .Where(x => x.ExamineeId == examineeId && x.TestId == testId)
+                .OrderByDescending(x => x.Date)
+                .ToList();
+
+            var latest = submissions
+                .OrderByDescending(x => x.CreatedAt)
+                .FirstOrDefault();
+
+            if (latest == null)
+                return null;
+
+            return new TestSubmissionDto
+            {
+                Id = latest.Id,
+                TestId = latest.TestId,
+                ExamineeId = latest.ExamineeId,
+                PersonalityId = latest.PersonalityId,
+                Date = latest.Date,
+                Answers = latest.Answers.Select(a => a.AnswerId).ToList()
+            };
         }
     }
 }

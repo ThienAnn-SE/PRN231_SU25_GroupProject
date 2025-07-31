@@ -83,7 +83,12 @@ namespace WebApi.Controllers
             }
             return await _majorService.DeletePersonalityFromMajorAsync(majorPersonalityDto);
         }
-
+        [HttpGet("with-university")]
+        public async Task<ApiResponse> GetAllMajorsWithUniversity()
+        {
+            var result = await _majorService.GetAllMajorsWithUniversityAsync();
+            return result;
+        }
         //[HttpPut("{id}")]
         //[ProducesResponseType(204)]
         //[ProducesResponseType(400)]

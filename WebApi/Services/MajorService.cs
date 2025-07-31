@@ -14,6 +14,7 @@ namespace WebApi.Services
         Task<bool> DeleteMajorAsync(Guid id, CancellationToken cancellationToken = default);
         Task<ApiResponse> AddNewPersonalityToMajorAsync(MajorPersonalityDto majorPersonalityDto, CancellationToken cancellationToken = default);
         Task<ApiResponse> DeletePersonalityFromMajorAsync(MajorPersonalityDto majorPersonalityDto, CancellationToken cancellationToken = default);
+        Task<ApiResponse> GetAllMajorsWithUniversityAsync(CancellationToken cancellationToken = default);
     }
 
     public class MajorService : IMajorService
@@ -186,6 +187,22 @@ namespace WebApi.Services
                 return ApiResponse.CreateNotFoundResponse("No majors found for the given personality ID.");
             }
             return ApiResponses<MajorDto>.CreateResponse(System.Net.HttpStatusCode.OK, true, "Retrieved majors successfully", majors);
+        }
+        public async Task<ApiResponse> GetAllMajorsWithUniversityAsync(CancellationToken cancellationToken = default)
+        {
+            var majors = await _unitOfWork.MajorRepository.GetAllWithUniversityAsync(cancellationToken);
+
+            if (majors == null || !majors.Any())
+            {
+                return ApiResponse.CreateNotFoundResponse("No majors with university found.");
+            }
+
+            return ApiResponses<MajorWithUniversityDto>.CreateResponse(
+                System.Net.HttpStatusCode.OK,
+                true,
+                "Retrieved majors with university successfully",
+                majors
+            );
         }
     }
 }

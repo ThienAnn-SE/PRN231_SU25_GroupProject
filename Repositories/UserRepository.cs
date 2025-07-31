@@ -34,7 +34,7 @@ namespace Repositories
         {
             var filter = new Expression<Func<User, bool>>[]
             {
-                x => x.Email == loginDto.UserName
+                x => x.Username == loginDto.UserName
             };
             var entity = await _repository
                 .FindOneAsync(filter, cancellationToken: cancellationToken);

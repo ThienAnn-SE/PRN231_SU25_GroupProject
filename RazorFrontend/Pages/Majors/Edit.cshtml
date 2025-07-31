@@ -14,6 +14,19 @@
                 <div class="alert alert-danger">@Model.ErrorMessage</div>
             }
 
+            @if (!ViewData.ModelState.IsValid)
+            {
+                <div class="alert alert-warning">
+                    Please fix the following errors:
+                    <ul>
+                        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                        {
+                            <li>@error.ErrorMessage</li>
+                        }
+                    </ul>
+                </div>
+            }
+
             <form method="post">
                 <div class="row g-3">
                     <div class="col-md-6">
@@ -28,7 +41,7 @@
                             <option value="">-- Select University --</option>
                             @foreach (var uni in Model.UniversityList)
                             {
-                                <option value="@uni.Id" selected="@(uni.Id == Model.Input.UniversityId)">
+                                <option value="@uni.Id" selected="@(uni.Id == Model.Input.UniversityId ? "selected" : null)">
                                     @uni.Name
                                 </option>
                             }

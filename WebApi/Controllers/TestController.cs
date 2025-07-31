@@ -44,5 +44,11 @@ namespace WebApi.Controllers
             var response = await _testService.CreateTestAsync(testDto, cancellationToken);
             return response;
         }
+        [HttpGet("by-type/{type}")]
+        public async Task<ApiResponse> GetByPersonalityType(string type, CancellationToken cancellationToken = default)
+        {
+            var response = await _testService.GetTestByPersonalityTypeAsync(type, cancellationToken);
+            return response;
+        }
     }
 }

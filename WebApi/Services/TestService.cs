@@ -13,6 +13,7 @@ namespace WebApi.Services
         Task<ApiResponse> GetTestByPersonalTypeAsync(Guid personalityTypeId, CancellationToken cancellationToken = default);
         Task<ApiResponse> CreateTestAsync(CreateTestDto testDto, CancellationToken cancellationToken = default);
         Task<ApiResponse> UpdateTestAsync(TestDto testDto, CancellationToken cancellationToken = default);
+        Task<ApiResponse> GetTestByPersonalityTypeAsync(string typeName, CancellationToken cancellationToken = default);
     }
 
     public class TestService : BaseService, ITestService
@@ -166,6 +167,20 @@ namespace WebApi.Services
         public Task<ApiResponse> UpdateTestAsync(TestDto testDto, CancellationToken cancellationToken = default)
         {
             throw new NotImplementedException();
+        }
+        public async Task<ApiResponse> GetTestByPersonalityTypeAsync(string typeName, CancellationToken cancellationToken = default)
+        {
+            var allTests = await unitOfWork.TestRepository.GetAll(cancellationToken);
+
+            var test = allTests.FirstOrDefault(t => t.PersonalityTypeId != Guid.Empty &&
+                                                    string.Equals(t.PersonalityType?.Name, typeName, StringComparison.OrdinalIgnoreCase));
+
+            if (test == null)
+            {
+                return ApiResponse.CreateNotFoundResponse("Test not found for the specified personality type.");
+            }
+
+            return ApiResponse<TestDto>.CreateResponse(System.Net.HttpStatusCode.OK, true, "Test retrieved successfully.", test);
         }
     }
 }

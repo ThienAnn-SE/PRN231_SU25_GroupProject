@@ -30,7 +30,6 @@ namespace RazorFrontend.Pages.Majors
         {
             await LoadUniversities();
         }
-
         public async Task<IActionResult> OnPostAsync()
         {
             await LoadUniversities();
@@ -40,7 +39,7 @@ namespace RazorFrontend.Pages.Majors
 
             try
             {
-                var client = _factory.CreateClient();
+                var client = _factory.CreateClient("ApiClient");
                 var endpoint = _config["ApiSettings:MajorCreateEndpoint"];
                 var response = await client.PostAsJsonAsync(endpoint, Input);
 
@@ -64,20 +63,28 @@ namespace RazorFrontend.Pages.Majors
         {
             try
             {
-                var client = _factory.CreateClient();
-                var endpoint = _config["ApiSettings:UniversityListEndpoint"] ?? "api/university";
+                var client = _factory.CreateClient("ApiClient");
+                var endpoint = _config["ApiSettings:UniversityListEndpoint"];
                 var response = await client.GetAsync(endpoint);
 
                 if (response.IsSuccessStatusCode)
                 {
-                    var data = await response.Content.ReadFromJsonAsync<List<UniversityDto>>();
-                    if (data != null) UniversityList = data;
+                    var apiResponse = await response.Content.ReadFromJsonAsync<AppCore.BaseModel.ApiResponses<UniversityDto>>();
+                    if (apiResponse?.Success == true && apiResponse.Data != null)
+                        UniversityList = apiResponse.Data;
+                }
+                else
+                {
+                    var body = await response.Content.ReadAsStringAsync();
+                    ErrorMessage = $"API error: {response.StatusCode} - {body}";
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                UniversityList = new(); // fallback
+                ErrorMessage = $"Exception: {ex.Message}";
+                UniversityList = new();
             }
         }
+
     }
 }

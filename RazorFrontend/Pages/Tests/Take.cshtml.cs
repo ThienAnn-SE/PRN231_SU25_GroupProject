@@ -6,7 +6,6 @@ using Microsoft.Extensions.Configuration;
 using System.Net.Http.Json;
 using System.Text.Json;
 
-
 namespace RazorFrontend.Pages.Tests
 {
     public class TakeModel : PageModel
@@ -24,20 +23,22 @@ namespace RazorFrontend.Pages.Tests
         public string? ErrorMessage { get; set; }
 
         [BindProperty]
-        public List<int> Answers { get; set; } = new();
+        public List<Guid> Answers { get; set; } = new();
+
+        private Guid CurrentTestId { get; set; }
 
         public async Task<IActionResult> OnGetAsync()
         {
             try
             {
                 var client = _clientFactory.CreateClient("ApiClient");
-                var testEndpoint = _config["ApiSettings:MBTITestId"]; // Get test by ID
-
-                var response = await client.GetFromJsonAsync<ApiResponse<TestDto>>($"api/test/{testEndpoint}");
+                var response = await client.GetFromJsonAsync<ApiResponse<TestDto>>("api/test/by-type/MBTI");
 
                 if (response?.Success == true && response.Data != null)
                 {
                     Questions = response.Data.Questions;
+                    CurrentTestId = response.Data.Id;
+                    TempData["CurrentTestId"] = CurrentTestId;
                     return Page();
                 }
 
@@ -56,15 +57,36 @@ namespace RazorFrontend.Pages.Tests
             if (Answers == null || Answers.Count != 50)
             {
                 ErrorMessage = "You must answer all 50 questions.";
-                return await OnGetAsync(); // Reload the test
+                return await OnGetAsync();
             }
 
             try
             {
-                // Gửi danh sách câu trả lời sang backend để đánh giá
-                var result = WebApi.Extension.TestEvaluationExtensions.EvaluateMBTI(Answers);
-                TempData["MbtiResult"] = result;
-                return RedirectToPage("Result");
+                var testId = Guid.Parse(TempData["CurrentTestId"]?.ToString() ?? Guid.Empty.ToString());
+
+                var client = _clientFactory.CreateClient("ApiClient");
+                var examineeId = new Guid("11111111-1111-1111-1111-111111111111");
+
+                var submission = new TestSubmissionDto
+                {
+                    TestId = testId,
+                    ExamineeId = examineeId,
+                    Date = DateTime.UtcNow,
+                    Answers = Answers
+                };
+
+                var response = await client.PostAsJsonAsync("api/testsubmission", submission);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var apiResult = await response.Content.ReadFromJsonAsync<ApiResponse>();
+                    TempData["SubmissionMessage"] = apiResult?.Message ?? "Submitted!";
+                    return RedirectToPage("Result");
+                }
+
+                var error = await response.Content.ReadAsStringAsync();
+                ErrorMessage = $"Submission failed: {error}";
+                return await OnGetAsync();
             }
             catch (Exception ex)
             {

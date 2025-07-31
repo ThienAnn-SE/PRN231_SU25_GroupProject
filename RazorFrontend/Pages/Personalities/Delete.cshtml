@@ -1,4 +1,41 @@
-﻿@page
+﻿@page "{id:guid}"
 @model RazorFrontend.Pages.Personalities.DeleteModel
 @{
+    ViewData["Title"] = "Delete Personality";
 }
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm border-danger">
+                <div class="card-body">
+                    <h2 class="text-center text-danger mb-3">🗑️ Confirm Delete</h2>
+
+                    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+                    {
+                        <div class="alert alert-danger">@Model.ErrorMessage</div>
+                    }
+
+                    <p class="lead">Are you sure you want to delete the following personality?</p>
+
+                    <dl class="row">
+                        <dt class="col-sm-4">Name</dt>
+                        <dd class="col-sm-8">@Model.Personality?.Name</dd>
+
+                        <dt class="col-sm-4">Personality Type</dt>
+                        <dd class="col-sm-8">@Model.Personality?.PersonalityType?.Name</dd>
+
+                        <dt class="col-sm-4">Description</dt>
+                        <dd class="col-sm-8">@Model.Personality?.Description</dd>
+                    </dl>
+
+                    <form method="post" class="text-end mt-4">
+                        <input type="hidden" asp-for="Id" />
+                        <button type="submit" class="btn btn-danger">Delete</button>
+                        <a asp-page="Index" class="btn btn-secondary ms-2">Cancel</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

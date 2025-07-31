@@ -24,4 +24,15 @@ namespace AppCore.Dtos
         public Guid MajorId { get; set; }
         public List<Guid> PersonalityIds { get; set; } = new List<Guid>();
     }
+    public class MajorWithUniversityDto : BaseDto
+    {
+        public string Name { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+        public string RequiredSkills { get; set; } = string.Empty;
+
+        public Guid UniversityId { get; set; }
+        public string UniversityName { get; set; } = string.Empty;
+
+        public List<PersonalityDto> Personalities { get; set; } = new();
+    }
 }
