@@ -2,8 +2,9 @@ using ApiService.Services.Interfaces;
 using AppCore.BaseModel;
 using AppCore.Dtos;
 using Repositories.Interfaces;
+using System.Net;
 
-namespace ApiService.Services
+namespace ApiService.Services { 
     public class PersonalityService : BaseService, IPersonalityService
     {
         public PersonalityService(IUnitOfWork unitOfWork) : base(unitOfWork)

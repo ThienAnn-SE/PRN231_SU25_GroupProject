@@ -1,5 +1,6 @@
 ﻿using AppCore.BaseModel;
 using AppCore.Dtos;
+using System.ComponentModel;
 
 namespace ApiAuthentication.Services.Interfaces
 {
@@ -11,5 +12,6 @@ namespace ApiAuthentication.Services.Interfaces
         Task<ApiResponse> InitTestUsers();
         Task<ApiResponse> ValidateToken(JwtOptions jwtOptions);
         Task<ApiResponse> KeepAlive(JwtOptions jwtOptions);
+        Task<ApiResponse> GetAll(CancellationToken cancellationToken = default);
     }
 }

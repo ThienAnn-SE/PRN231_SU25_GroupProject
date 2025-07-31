@@ -4,6 +4,7 @@ using AppCore.Dtos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using WebApi.Extension;
 
 
 namespace WebApi.Controllers
@@ -89,6 +90,17 @@ namespace WebApi.Controllers
                 NotFound(result);
             }
             return Ok(result);
+        }
+        [Authorize(Roles = Role.Admin)]
+        [HttpGet()]
+        public async Task<IActionResult> GetAllUsers(CancellationToken cancellationToken = default)
+        {
+            var response = await _userService.GetAll(cancellationToken);
+            if (response.Status == System.Net.HttpStatusCode.NotFound)
+            {
+                return NotFound(response);
+            }
+            return Ok(response);
         }
     }
 }
