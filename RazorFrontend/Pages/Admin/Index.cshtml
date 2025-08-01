@@ -1,0 +1,140 @@
+@page
+@model RazorFrontend.Pages.Admin.IndexModel
+@{
+    ViewData["Title"] = "Admin Dashboard";
+}
+
+<div class="container mt-4">
+    <h2>Admin Dashboard</h2>
+
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <div class="alert alert-danger">
+            @Model.ErrorMessage
+        </div>
+    }
+
+    <ul class="nav nav-tabs" id="adminTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="users-tab" data-bs-toggle="tab" data-bs-target="#users" type="button" role="tab" aria-controls="users" aria-selected="true">
+                Users Management
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="tests-tab" data-bs-toggle="tab" data-bs-target="#tests" type="button" role="tab" aria-controls="tests" aria-selected="false">
+                Tests Management
+            </button>
+        </li>
+    </ul>
+
+    <div class="tab-content mt-3" id="adminTabContent">
+        <div class="tab-pane fade show active" id="users" role="tabpanel" aria-labelledby="users-tab">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Users List</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Username</th>
+                                    <th>Email</th>
+                                    <th>Role</th>
+                                    <th>Email Confirmed</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var user in Model.Users)
+                                {
+                                    <tr>
+                                        <td>@user.Username</td>
+                                        <td>@user.Email</td>
+                                        <td><span class="badge bg-info">@user.Role</span></td>
+                                        <td>
+                                            @if (user.EmailConfirmed)
+                                            {
+                                                <span class="badge bg-success">Confirmed</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-warning">Pending</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            @if (user.LockoutEnd.HasValue && user.LockoutEnd > DateTime.UtcNow)
+                                            {
+                                                <span class="badge bg-danger">Locked</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-success">Active</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            <div class="btn-group">
+                                                <button class="btn btn-sm btn-warning" title="Edit">
+                                                    <i class="bi bi-pencil"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-danger" title="Delete">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-pane fade" id="tests" role="tabpanel" aria-labelledby="tests-tab">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Tests List</h5>
+                    <a href="/Tests/Create" class="btn btn-primary btn-sm">
+                        <i class="bi bi-plus"></i> Create New Test
+                    </a>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Title</th>
+                                    <th>Description</th>
+                                    <th>Created At</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var test in Model.Tests)
+                                {
+                                    <tr>
+                                        <td>@test.Title</td>
+                                        <td>@test.Description</td>
+                                        <td>@test.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                                        <td>
+                                            <div class="btn-group">
+                                                <a href="/Tests/Edit/@test.Id" class="btn btn-sm btn-warning" title="Edit">
+                                                    <i class="bi bi-pencil"></i>
+                                                </a>
+                                                <a href="/Tests/Delete/@test.Id" class="btn btn-sm btn-danger" title="Delete">
+                                                    <i class="bi bi-trash"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

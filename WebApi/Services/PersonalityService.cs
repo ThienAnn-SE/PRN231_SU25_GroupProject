@@ -4,6 +4,7 @@ using AppCore.Dtos;
 using Repositories.Interfaces;
 using System.Net;
 
+
 namespace ApiService.Services 
 { 
     public class PersonalityService : BaseService, IPersonalityService

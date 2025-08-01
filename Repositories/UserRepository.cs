@@ -164,9 +164,21 @@ namespace Repositories
             };
         }
 
-        public Task<List<UserDto>> GetAllAsync(CancellationToken cancellationToken = default)
+        public async Task<List<UserDto>> GetAllAsync(CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            var user = await _repository.GetAllAsync(cancellationToken: cancellationToken);
+            var userDtos = user.Select(u => new UserDto()
+            {
+                Id = u.Id,
+                Username = u.Username,
+                Email = u.Email,
+                EmailConfirmed = u.EmailConfirmed,
+                TwoFactorEnabled = u.TwoFactorEnabled,
+                LockoutEnd = u.LockoutEnd,
+                AccessFailedCount = u.AccessFailedCount,
+                Role = u.Role
+            }).ToList();
+            return userDtos;
         }
 
         public async Task<UserDto?> GetByEmailAsync(string email, CancellationToken cancellationToken = default)

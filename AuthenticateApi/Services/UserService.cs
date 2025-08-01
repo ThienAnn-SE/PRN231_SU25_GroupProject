@@ -191,5 +191,20 @@ namespace ApiAuthentication.Services
             }
             return ApiResponse.CreateSuccessResponse("Rotate token successfully!");
         }
+
+        public async Task<ApiResponse> GetAll(CancellationToken cancellationToken = default)
+        {
+            var users = await unitOfWork.UserAuth.GetAllAsync(cancellationToken);
+            if (users == null || !users.Any())
+                {
+                    return ApiResponse.CreateNotFoundResponse("No tests found.");
+                }
+                return ApiResponses<UserDto>.CreateResponse(
+                    System.Net.HttpStatusCode.OK,
+                    true,
+                    "Tests retrieved successfully.",
+                    users
+                );
+        }
     }
 }

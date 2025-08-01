@@ -47,5 +47,7 @@ namespace RazorFrontend
     {
         public string BaseUrl { get; set; } = string.Empty;
         public string LoginEndpoint { get; set; } = string.Empty;
+        public string TestListEndpoint { get; set; } = string.Empty;
+        public string UserListEndpoint { get; set; } = string.Empty;
     }
 }
