@@ -5,6 +5,7 @@ using AppCore.Dtos;
 using System.Net.Http.Json;
 using AppCore.BaseModel;
 using System.Text.Json;
+using Microsoft.Extensions.Options;
 
 namespace RazorFrontend.Pages.Admin
 {
@@ -12,28 +13,38 @@ namespace RazorFrontend.Pages.Admin
     public class IndexModel : PageModel
     {
         private readonly IHttpClientFactory _factory;
-        private readonly IConfiguration _config;
+        private readonly ApiSettings _apiSettings;
 
-        public IndexModel(IHttpClientFactory factory, IConfiguration config)
+        public IndexModel(IHttpClientFactory factory, IOptions<ApiSettings> options)
         {
             _factory = factory;
-            _config = config;
+            _apiSettings = options.Value;
         }
 
         public List<TestDto> Tests { get; set; } = new();
         public List<UserDto> Users { get; set; } = new();
         public string? ErrorMessage { get; set; }
 
-        public async Task OnGetAsync()
+        public async Task<IActionResult> OnGetAsync()
         {
+            if(string.IsNullOrWhiteSpace(_apiSettings.TestListEndpoint) ||
+               string.IsNullOrWhiteSpace(_apiSettings.UserListEndpoint))
+            {
+                ErrorMessage = "API settings are not configured properly.";
+                return Page();
+            }
             var client = _factory.CreateClient();
             try
             {
                 // Get Tests
-                var testsEndpoint = $"{_config["ApiSettings:TestListEndpoint"]}" ?? "api/test";
-                var testsResponse = await client.GetAsync(testsEndpoint);
+                var testsResponse = await client.GetAsync(_apiSettings.TestListEndpoint);
+                if (!testsResponse.IsSuccessStatusCode)
+                {
+                    ErrorMessage = $"Test API call failed: {testsResponse.StatusCode}";
+                    return Page();
+                }
 
-                if (testsResponse.IsSuccessStatusCode)
+                    if (testsResponse.IsSuccessStatusCode)
                 {
                     var testJson = await testsResponse.Content.ReadAsStringAsync();
                     var testResult = JsonSerializer.Deserialize<ApiResponses<TestDto>>(testJson, new JsonSerializerOptions
@@ -48,18 +59,22 @@ namespace RazorFrontend.Pages.Admin
                     else
                     {
                         ErrorMessage = testResult?.Message ?? "Failed to load tests.";
-                        return;
+                        return Page();
                     }
                 }
                 else
                 {
                     ErrorMessage = $"Test API call failed: {testsResponse.StatusCode}";
-                    return;
+                    return Page();
                 }
 
                 // Get Users
-                var usersEndpoint = $"{_config["ApiSettings:UserListEndpoint"]}" ?? "api/user";
-                var usersResponse = await client.GetAsync(usersEndpoint);
+                var usersResponse = await client.GetAsync(_apiSettings.UserListEndpoint);
+                if (!usersResponse.IsSuccessStatusCode)
+                {
+                    ErrorMessage = $"User API call failed: {usersResponse.StatusCode}";
+                    return Page();
+                }
 
                 if (usersResponse.IsSuccessStatusCode)
                 {
@@ -76,13 +91,13 @@ namespace RazorFrontend.Pages.Admin
                     else
                     {
                         ErrorMessage = userResult?.Message ?? "Failed to load users.";
-                        return;
+                        return Page();
                     }
                 }
                 else
                 {
                     ErrorMessage = $"User API call failed: {usersResponse.StatusCode}";
-                    return;
+                    return Page();
                 }
 
             }
@@ -90,6 +105,7 @@ namespace RazorFrontend.Pages.Admin
             {
                 ErrorMessage = $"Unexpected error: {ex.Message}";
             }
+            return Page();
         }
     }
 }

@@ -23,6 +23,8 @@
     "UserProfileCreateEndpoint": "gateway/userprofile",
     "UserProfileUpdateEndpoint": "gateway/userprofile/{0}",
     "MBTITestId": "REPLACE_WITH_TEST_GUID",
-    "TestByIdEndpoint": "gateway/test/{0}"
+    "TestByIdEndpoint": "gateway/test/{0}",
+    "TestListEndpoint": "gateway/test",
+    "UserListEndpoint": "gateway/user"
   }
 } 
